@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import backgroundImage from "../assets/background.png";
+import mainLogo from "../assets/mainLogo.png";
 
 const Container = styled.div`
   position: relative;
@@ -27,8 +28,7 @@ const Header = styled.header`
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background-color: ${(props) => props.theme.colors.gray};
-  color: white;
+  background-color: ${(props) => props.theme.colors.lightGray};
   position: absolute;
   width: 100%;
   box-shadow: 0 0 10px ${(props) => props.theme.colors.gray};
@@ -46,25 +46,31 @@ const Nav = styled.nav`
 `;
 
 const StyledLink = styled(Link)`
-  color: white;
   text-decoration: none;
   font-size: 16px;
   display: flex;
   align-items: center;
+  color: black;
 
   &:hover {
-    color: ${(props) => props.theme.colors.darkGray};
+    color: ${(props) => props.theme.colors.gray};
   }
 `;
 
 const HomeLogoLink = styled(Link)`
-  color: white;
   text-decoration: none;
   font-size: 24px;
+  display: flex;
   
   &:hover {
-    color: ${(props) => props.theme.colors.darkGray};
+    color: ${(props) => props.theme.colors.gray};
   }
+`;
+
+const LogoImage = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 10%;
 `;
 
 const Layout = ({ children }) => {
@@ -80,7 +86,9 @@ const Layout = ({ children }) => {
   return (
     <Container>
       <Header>
-        <HomeLogoLink to="/">멋이룸</HomeLogoLink>
+      <HomeLogoLink to="/">
+          <LogoImage src={mainLogo} alt="멋이룸" />
+        </HomeLogoLink>
         <Nav>
           {context.isAuthenticated ? (
             <>
