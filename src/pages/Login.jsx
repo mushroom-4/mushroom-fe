@@ -14,16 +14,21 @@ const Wrapper = styled.div`
 
 const Form = styled.form`
   background-color: white;
-  padding: 20px;
-  border-radius: 8px;
+  padding: 30px 20px;
+  border-radius: 10px;
   box-shadow: 0 0 10px ${(props) => props.theme.colors.gray};
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 `;
 
 const Input = styled.input`
   display: block;
-  width: 100%;
-  margin-bottom: 10px;
+  width: 300px;
   padding: 8px;
+  border-radius: 10px;
+  outline: none;
+  border: 1px solid ${(props) => props.theme.colors.gray};
 `;
 
 const Button = styled.button`
