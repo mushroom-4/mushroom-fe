@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
-import { fetchAuctionItemDetail } from "../api/auctionItem";
+import { fetchAuctionItemDetail, placeBid } from "../api/auctionItem";
 import defaultImage from "../assets/background.png";
 
 const IMAGE_BASE_URL = "https://yeim-vpc-bucket-240130.s3.ap-northeast-2.amazonaws.com/public/";
@@ -50,10 +50,88 @@ const Loading = styled.p`
   color: ${(props) => props.theme.colors.darkGray};
 `;
 
+const BidButton = styled.button`
+  margin-top: 20px;
+  padding: 10px 16px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: ${(props) => props.theme.colors.darkGray};
+  color: white;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.gray};
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 400px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+`;
+
+const ModalTitle = styled.h3`
+  margin-bottom: 10px;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+`;
+
+const CancelButton = styled.button`
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid ${(props) => props.theme.colors.gray};
+  cursor: pointer;
+`;
+
+const ConfirmButton = styled.button`
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: ${(props) => props.theme.colors.darkGray};
+  color: white;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background: ${(props) => props.theme.colors.gray};
+  }
+`;
+
 const AuctionItemDetail = () => {
   const { auctionItemId } = useParams(); // URL에서 auctionItemId 가져오기
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [biddingPrice, setBiddingPrice] = useState("");
 
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
@@ -68,6 +146,32 @@ const AuctionItemDetail = () => {
 
   if (loading) return <Loading>로딩 중...</Loading>;
 
+  const handleOpenModal = () => {
+    setBiddingPrice(""); // 초기화
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleBidSubmit = async () => {
+    if (!biddingPrice || isNaN(biddingPrice) || Number(biddingPrice) <= 0 || biddingPrice % 500 !== 0) {
+      alert("올바른 입찰가를 입력해주세요.");
+      return;
+    }
+
+    const response = await placeBid(auctionItemId, Number(biddingPrice));
+
+    if (response.success) {
+      setIsModalOpen(false);
+      alert("입찰에 성공했습니다.");
+    } else {
+      setIsModalOpen(false);
+      alert(response.message);
+    }
+  };
+
   return (
     <Container>
       <Image src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage} alt={item.name} />
@@ -81,7 +185,26 @@ const AuctionItemDetail = () => {
         <DetailItem>⏳ 종료 시간: {new Date(item.endTime).toLocaleString("ko-KR")}</DetailItem>
         <DetailItem>🔍 상태: {item.status}</DetailItem>
       </Info>
-    </Container>
+      <BidButton onClick={handleOpenModal}>입찰하기</BidButton>
+      {isModalOpen && (
+      <ModalOverlay>
+        <ModalContent>
+          <ModalTitle>입찰하기</ModalTitle>
+          <Input
+            type="text"
+            placeholder="입찰 금액 입력"
+            value={biddingPrice}
+            onChange={(e) => setBiddingPrice(e.target.value)}
+          />
+          <DetailItem>판매자가 설정한 경매 단위: 500원</DetailItem>
+          <ButtonGroup>
+            <CancelButton onClick={handleCloseModal}>취소</CancelButton>
+            <ConfirmButton onClick={handleBidSubmit}>입찰</ConfirmButton>
+          </ButtonGroup>
+        </ModalContent>
+      </ModalOverlay>
+    )}
+  </Container>
   );
 };
 
