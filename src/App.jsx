@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import MyPage from './pages/MyPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import AuctionItemDetail from './pages/AuctionItemDetil';
 
 function App() {
   return (
@@ -12,8 +13,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>}
-        />
+        <Route path="/auction/:auctionItemId" element={<AuctionItemDetail />} />
+        <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>}/>
       </Routes>
     </Router>
   );

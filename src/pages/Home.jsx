@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { fetchAuctionItems } from "../api/auctionItem";
 import Layout from "../components/Layout";
 import defaultImage from "../assets/background.png";
+import { useNavigate } from "react-router-dom";
 
 const IMAGE_BASE_URL = "https://yeim-vpc-bucket-240130.s3.ap-northeast-2.amazonaws.com/public/";
 
@@ -22,6 +23,13 @@ const Card = styled.div`
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out; /* ✅ 부드러운 효과 */
+
+  &:hover {
+    transform: translateY(-5px); /* ✅ 약간 위로 이동 */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* ✅ 그림자 강조 */
+  }
 `;
 
 const ImageWrapper = styled.div`
@@ -98,6 +106,7 @@ const PageButton = styled.button`
 `;
 
 const Home = () => {
+  const navigate = useNavigate();
   const [auctionItems, setAuctionItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -116,7 +125,7 @@ const Home = () => {
     <Layout>
       <Container>
         {auctionItems.map((item) => (
-          <Card key={item.auctionItemId}>
+          <Card key={item.auctionItemId} onClick={() => navigate(`/auction/${item.auctionItemId}`)}>
             <ImageWrapper>
               <Image
                 src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage}

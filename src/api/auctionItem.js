@@ -13,3 +13,17 @@ export const fetchAuctionItems = async (page = 1) => {
     return { content: [], page: {} };
   }
 };
+
+/**
+ * 경매 물품 상세 조회
+ */
+export const fetchAuctionItemDetail = async (auctionItemId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auction-items/${auctionItemId}/info`);
+    const data = await response.json();
+    return data.success ? data.data : null;
+  } catch (error) {
+    console.error("API 요청 중 오류 발생:", error);
+    return null;
+  }
+};
