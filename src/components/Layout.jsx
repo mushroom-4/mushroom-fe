@@ -45,6 +45,11 @@ const Nav = styled.nav`
   gap: 16px;
 `;
 
+const Section = styled.section`
+  margin: 0 auto;
+  max-width: 1100px;
+`;
+
 const StyledLink = styled(Link)`
   text-decoration: none;
   font-size: 16px;
@@ -104,7 +109,7 @@ const Layout = ({ children }) => {
         </Nav>
       </Header>
       <HeaderDummy />
-      {children}
+      <Section>{children}</Section>
     </Container>
   );
 };
