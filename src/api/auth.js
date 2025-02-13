@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8080/api/v1/auth";
+const API_BASE_URL = "https://mutt-iroom.store/api/v1/auth";
 
 export const register = async (nickname, email, password) => {
   try {
@@ -8,7 +8,10 @@ export const register = async (nickname, email, password) => {
       body: JSON.stringify({ nickname, email, password, userRole: "USER" }),
     });
 
+    console.log(response);
+
     const data = await response.json();
+    console.log(data);
     return data;
   } catch (error) {
     return { success: false, message: "네트워크 오류 발생" };
