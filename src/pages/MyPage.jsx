@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import Layout from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
 
 const Wrapper = styled.div`
@@ -15,11 +14,9 @@ const MyPage = () => {
   const { nickname } = useAuth();
 
   return (
-    <Layout>
-      <Wrapper>
-        <h2>{nickname}님의 마이페이지 입니다.</h2>
-      </Wrapper>
-    </Layout>
+    <Wrapper>
+      <h2>{nickname}님의 마이페이지 입니다.</h2>
+    </Wrapper>
   );
 };
 

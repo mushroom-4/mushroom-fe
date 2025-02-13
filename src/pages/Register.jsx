@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../components/Layout';
 import { register } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 
@@ -61,16 +60,14 @@ const Register = () => {
   };
 
   return (
-    <Layout>
-      <Wrapper>
-        <Form onSubmit={handleSubmit}>
-          <Input type="text" name="nickname" placeholder="닉네임" onChange={handleChange} required />
-          <Input type="email" name="email" placeholder="이메일" onChange={handleChange} required />
-          <Input type="password" name="password" placeholder="비밀번호" onChange={handleChange} required />
-          <Button type="submit">회원가입</Button>
-        </Form>
-      </Wrapper>
-    </Layout>
+    <Wrapper>
+      <Form onSubmit={handleSubmit}>
+        <Input type="text" name="nickname" placeholder="닉네임" onChange={handleChange} required />
+        <Input type="email" name="email" placeholder="이메일" onChange={handleChange} required />
+        <Input type="password" name="password" placeholder="비밀번호" onChange={handleChange} required />
+        <Button type="submit">회원가입</Button>
+      </Form>
+    </Wrapper>
   );
 };
 

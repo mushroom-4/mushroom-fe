@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import { fetchAuctionItemDetail } from "../api/auctionItem";
-import Layout from "../components/Layout";
 import defaultImage from "../assets/background.png";
 
 const IMAGE_BASE_URL = "https://yeim-vpc-bucket-240130.s3.ap-northeast-2.amazonaws.com/public/";
@@ -70,21 +69,19 @@ const AuctionItemDetail = () => {
   if (loading) return <Loading>로딩 중...</Loading>;
 
   return (
-    <Layout>
-      <Container>
-        <Image src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage} alt={item.name} />
-        <Info>
-          <Title>{item.brand} - {item.name}</Title>
-          <Description>{item.description}</Description>
-          <DetailItem>📏 사이즈: {item.size}</DetailItem>
-          <DetailItem>📂 카테고리: {item.category}</DetailItem>
-          <DetailItem>💰 시작 가격: {item.startPrice.toLocaleString()}원</DetailItem>
-          <DetailItem>⏳ 시작 시간: {new Date(item.startTime).toLocaleString("ko-KR")}</DetailItem>
-          <DetailItem>⏳ 종료 시간: {new Date(item.endTime).toLocaleString("ko-KR")}</DetailItem>
-          <DetailItem>🔍 상태: {item.status}</DetailItem>
-        </Info>
-      </Container>
-    </Layout>
+    <Container>
+      <Image src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage} alt={item.name} />
+      <Info>
+        <Title>{item.brand} - {item.name}</Title>
+        <Description>{item.description}</Description>
+        <DetailItem>📏 사이즈: {item.size}</DetailItem>
+        <DetailItem>📂 카테고리: {item.category}</DetailItem>
+        <DetailItem>💰 시작 가격: {item.startPrice.toLocaleString()}원</DetailItem>
+        <DetailItem>⏳ 시작 시간: {new Date(item.startTime).toLocaleString("ko-KR")}</DetailItem>
+        <DetailItem>⏳ 종료 시간: {new Date(item.endTime).toLocaleString("ko-KR")}</DetailItem>
+        <DetailItem>🔍 상태: {item.status}</DetailItem>
+      </Info>
+    </Container>
   );
 };
 

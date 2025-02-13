@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { fetchAuctionItems } from "../api/auctionItem";
-import Layout from "../components/Layout";
 import defaultImage from "../assets/background.png";
 import { useNavigate } from "react-router-dom";
 
@@ -122,7 +121,7 @@ const Home = () => {
   }, [currentPage]);
 
   return (
-    <Layout>
+    <>
       <Container>
         {auctionItems.map((item) => (
           <Card key={item.auctionItemId} onClick={() => navigate(`/auction/${item.auctionItemId}`)}>
@@ -153,7 +152,7 @@ const Home = () => {
           </PageButton>
         ))}
       </Pagination>
-    </Layout>
+    </>
   );
 };
 

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Link, useNavigate } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import backgroundImage from "../assets/background.png";
 import mainLogo from "../assets/mainLogo.png";
@@ -78,7 +78,7 @@ const LogoImage = styled.img`
   border-radius: 10%;
 `;
 
-const Layout = ({ children }) => {
+const Layout = () => {
   const navigate = useNavigate();
   const context = useAuth();
 
@@ -109,7 +109,9 @@ const Layout = ({ children }) => {
         </Nav>
       </Header>
       <HeaderDummy />
-      <Section>{children}</Section>
+      <Section>
+        <Outlet />
+      </Section>
     </Container>
   );
 };
