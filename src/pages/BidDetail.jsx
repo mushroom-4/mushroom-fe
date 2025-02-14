@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import { fetchBidDetail } from "../api/bid";
-import { IMAGE_BASE_URL } from "../api/auctionRegistration";
 import defaultImage from "../assets/background.png";
+import {IMAGE_BASE_URL} from "../config";
+
 
 const Container = styled.div`
   max-width: 600px;
@@ -59,8 +60,8 @@ const BidDetail = () => {
   useEffect(() => {
     const loadBidDetail = async () => {
       setLoading(true);
-      const data = await fetchBidDetail(bidId);
-      setBid(data);
+      const response = await fetchBidDetail(bidId);
+      setBid(response.data);
       setLoading(false);
     };
 

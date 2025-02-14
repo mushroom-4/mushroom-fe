@@ -3,8 +3,7 @@ import styled from "styled-components";
 import { fetchAuctionItems } from "../api/auctionItem";
 import defaultImage from "../assets/background.png";
 import { useNavigate } from "react-router-dom";
-
-const IMAGE_BASE_URL = "https://yeim-vpc-bucket-240130.s3.ap-northeast-2.amazonaws.com/public/";
+import {IMAGE_BASE_URL} from "../config";
 
 const Container = styled.div`
   display: flex;
@@ -123,9 +122,9 @@ const Home = () => {
 
   useEffect(() => {
     const loadAuctionItems = async () => {
-      const data = await fetchAuctionItems(currentPage);
-      setAuctionItems(data.content);
-      setTotalPages(data.page.totalPages);
+      const response = await fetchAuctionItems(currentPage);
+      setAuctionItems(response.data.content);
+      setTotalPages(response.data.page.totalPages);
     };
 
     loadAuctionItems();

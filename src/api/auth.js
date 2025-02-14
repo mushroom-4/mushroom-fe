@@ -1,31 +1,12 @@
-const API_BASE_URL = "https://mutt-iroom.store/api/v1/auth";
+import { request } from "./apiClient";
+import { API_ENDPOINTS } from "./apiEndpoints";
 
-export const register = async (nickname, email, password) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nickname, email, password, userRole: "USER" }),
-    });
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    return { success: false, message: "네트워크 오류 발생" };
-  }
+/** ✅ 회원가입 */
+export const register = (nickname, email, password) => {
+  return request(API_ENDPOINTS.AUTH.REGISTER, "POST", { nickname, email, password, userRole: "USER" }, false);
 };
 
-export const login = async (email, password) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    return { success: false, message: "네트워크 오류 발생" };
-  }
+/** ✅ 로그인 */
+export const login = (email, password) => {
+  return request(API_ENDPOINTS.AUTH.LOGIN, "POST", { email, password }, false);
 };

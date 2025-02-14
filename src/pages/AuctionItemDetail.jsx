@@ -3,8 +3,7 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import { fetchAuctionItemDetail, placeBid } from "../api/auctionItem";
 import defaultImage from "../assets/background.png";
-
-const IMAGE_BASE_URL = "https://yeim-vpc-bucket-240130.s3.ap-northeast-2.amazonaws.com/public/";
+import {IMAGE_BASE_URL} from "../config";
 
 const Container = styled.div`
   max-width: 800px;
@@ -146,8 +145,8 @@ const AuctionItemDetail = () => {
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
       setLoading(true);
-      const data = await fetchAuctionItemDetail(auctionItemId);
-      setItem(data);
+      const response = await fetchAuctionItemDetail(auctionItemId);
+      setItem(response.data);
       setLoading(false);
     };
 
@@ -205,7 +204,6 @@ const AuctionItemDetail = () => {
     }
 
     const response = await placeBid(auctionItemId, Number(biddingPrice));
-
     if (response.success) {
       setIsModalOpen(false);
       alert("입찰에 성공했습니다.");

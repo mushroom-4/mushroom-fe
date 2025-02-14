@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { fetchAuctionItemDetail, updateAuctionItem, deleteAuctionItem } from "../api/auctionRegistration";
-import { IMAGE_BASE_URL } from "../api/auctionRegistration";
+import {IMAGE_BASE_URL} from "../config";
 
 const Container = styled.div`
   max-width: 600px;
