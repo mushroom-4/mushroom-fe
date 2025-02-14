@@ -49,25 +49,34 @@ const Image = styled.img`
 
 const Content = styled.div`
   padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: start;
 `;
 
 const Title = styled.h3`
   font-size: 16px;
   font-weight: bold;
-  margin: 0;
 `;
 
 const Description = styled.p`
   font-size: 14px;
   color: ${(props) => props.theme.colors.darkGray};
-  margin: 4px 0 8px;
 `;
 
 const Price = styled.p`
   font-size: 14px;
   font-weight: bold;
   color: black;
-  margin: 4px 0;
+`;
+
+const Status = styled.p`
+  font-size: 12px;
+  color: ${(props) => (props.isWaiting ? props.theme.colors.lightGray : props.theme.colors.darkGray)};
+  background-color: ${(props) => (!props.isWaiting ? props.theme.colors.lightGray : props.theme.colors.darkGray)};
+  padding: 2px 5px;
+  border-radius: 5px;
 `;
 
 const Timestamp = styled.p`
@@ -80,8 +89,8 @@ const Timestamp = styled.p`
 const Pagination = styled.div`
   display: flex;
   justify-content: center;
-  margin-top: 20px;
   gap: 8px;
+  padding: 20px;
 `;
 
 const PageButton = styled.button`
@@ -135,6 +144,7 @@ const Home = () => {
               <Timestamp>{new Date(item.startTime).toLocaleString("ko-KR")} 시작</Timestamp>
               <Title>{item.brand}</Title>
               <Description>{item.name}</Description>
+              <Status isWaiting={item.status === 'WAITING'}>{item.status}</Status>
               <Price>{item.startPrice.toLocaleString()}원</Price>
             </Content>
           </Card>
