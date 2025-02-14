@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { createAuctionItem } from "../api/auctionRegistration";
 
-const Container = styled.div`
+const Form = styled.form`
   max-width: 600px;
   margin: 40px auto;
   padding: 20px;
@@ -17,19 +17,45 @@ const Title = styled.h2`
   margin-bottom: 20px;
 `;
 
+const Label = styled.label`
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+`;
+
 const Input = styled.input`
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
+  background: white !important;
+  color: black;
+
+  &::placeholder {
+    color: #888;
+  }
+
+  &[type="datetime-local"] {
+    appearance: none;
+    position: relative;
+  }
+
+  &[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+  }
 `;
 
-const Label = styled.label`
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 5px;
-  display: block;
+const Select = styled.select`
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white !important;
+  color: black;
 `;
 
 const ButtonGroup = styled.div`
@@ -55,21 +81,59 @@ const Button = styled.button`
 
 const AuctionItemCreate = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState(new FormData());
+
+  // 🔹 일반 입력 필드 상태
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    auctionItemSize: "M",
+    auctionItemCategory: "TOP",
+    brand: "",
+    startPrice: "",
+    startTime: getFutureTime(10),
+    endTime: getFutureTime(20),
+  });
+
+  const [image, setImage] = useState(null);
+
+  // 🔹 옵션 목록
+  const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL", "FREE"];
+  const categoryOptions = ["SHOES", "TOP", "BOTTOM", "OUTER", "BAG", "ACCESSORIES", "ETC"];
+
+  function getFutureTime(minutes) {
+    const date = new Date();
+    date.setMinutes(date.getMinutes() + minutes);
+  
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutesStr = String(date.getMinutes()).padStart(2, "0");
+  
+    return `${year}-${month}-${day}T${hours}:${minutesStr}`;
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    formData.set(name, value);
-    setFormData(formData);
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e) => {
-    formData.set("image", e.target.files[0]);
-    setFormData(formData);
+    setImage(e.target.files[0]); // 개별적으로 이미지 상태 저장
   };
 
-  const handleSubmit = async () => {
-    const response = await createAuctionItem(formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // 🔹 새로운 FormData 객체 생성
+    const form = new FormData();
+    Object.keys(formData).forEach((key) => form.append(key, formData[key]));
+    if (image) {
+      form.append("image", image);
+    }
+
+    const response = await createAuctionItem(form);
+
     if (response.success) {
       alert("경매 아이템이 등록되었습니다.");
       navigate("/registrations");
@@ -79,40 +143,61 @@ const AuctionItemCreate = () => {
   };
 
   return (
-    <Container>
+    <Form onSubmit={handleSubmit}>
       <Title>경매 아이템 등록</Title>
+
       <Label>이미지</Label>
       <Input type="file" name="image" onChange={handleImageChange} />
       
       <Label>상품명</Label>
-      <Input type="text" name="name" onChange={handleInputChange} />
+      <Input type="text" name="name" placeholder="필수" value={formData.name} onChange={handleInputChange} required />
       
       <Label>설명</Label>
-      <Input type="text" name="description" onChange={handleInputChange} />
+      <Input type="text" name="description" value={formData.description} onChange={handleInputChange} />
       
       <Label>사이즈</Label>
-      <Input type="text" name="auctionItemSize" onChange={handleInputChange} />
+      <Select name="auctionItemSize" value={formData.auctionItemSize} onChange={handleInputChange}>
+        {sizeOptions.map((size) => (
+          <option key={size} value={size}>{size}</option>
+        ))}
+      </Select>
       
       <Label>카테고리</Label>
-      <Input type="text" name="auctionItemCategory" onChange={handleInputChange} />
-      
+      <Select name="auctionItemCategory" value={formData.auctionItemCategory} onChange={handleInputChange}>
+        {categoryOptions.map((category) => (
+          <option key={category} value={category}>{category}</option>
+        ))}
+      </Select>
+
       <Label>브랜드</Label>
-      <Input type="text" name="brand" onChange={handleInputChange} />
+      <Input type="text" name="brand" placeholder="필수" value={formData.brand} onChange={handleInputChange} required/>
       
       <Label>시작 가격</Label>
-      <Input type="number" name="startPrice" onChange={handleInputChange} />
+      <Input type="number" name="startPrice" placeholder="필수" value={formData.startPrice} onChange={handleInputChange} required/>
       
       <Label>시작 시간</Label>
-      <Input type="datetime-local" name="startTime" onChange={handleInputChange} />
+      <Input 
+        type="datetime-local" 
+        name="startTime" 
+        value={formData.startTime} 
+        onChange={handleInputChange}
+        required
+      />
       
       <Label>종료 시간</Label>
-      <Input type="datetime-local" name="endTime" onChange={handleInputChange} />
+      <Input 
+        type="datetime-local" 
+        name="endTime" 
+        value={formData.endTime} 
+        onChange={handleInputChange}
+        required
+      />
 
       <ButtonGroup>
-        <Button onClick={() => navigate("/registrations")}>취소</Button>
-        <Button onClick={handleSubmit} primary>등록</Button>
+        <Button type="button" onClick={() => navigate("/registrations")}>취소</Button>
+        <Button type="submit" primary>등록</Button>
       </ButtonGroup>
-    </Container>
+    </Form>
   );
 };
 

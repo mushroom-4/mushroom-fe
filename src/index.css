@@ -26,7 +26,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --primary-bg-color: #FFFFFF;
-  --primary-text-color: #000000;
+  --primary-text-color: #444444;
 }
 
 a {
@@ -69,10 +69,7 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-input {
-  background-color: var(--primary-bg-color);
-  color: var(--primary-text-color);
-}
+
 
 @media (prefers-color-scheme: light) {
   :root {

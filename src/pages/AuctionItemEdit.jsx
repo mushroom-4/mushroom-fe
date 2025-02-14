@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { fetchAuctionItemDetail, updateAuctionItem, deleteAuctionItem } from "../api/auctionRegistration";
-import {IMAGE_BASE_URL} from "../config";
+import { IMAGE_BASE_URL } from "../config";
 
-const Container = styled.div`
+const Form = styled.form`
   max-width: 600px;
   margin: 40px auto;
   padding: 20px;
@@ -18,20 +18,40 @@ const Title = styled.h2`
   margin-bottom: 20px;
 `;
 
+const Label = styled.label`
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+`;
+
 const Input = styled.input`
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
+  background: white !important;
+  color: black;
+
+  &::placeholder {
+    color: #888;
+  }
+
+  &[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+  }
 `;
 
-const Textarea = styled.textarea`
+const Select = styled.select`
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
+  background: white !important;
+  color: black;
 `;
 
 const ButtonGroup = styled.div`
@@ -46,12 +66,12 @@ const Button = styled.button`
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  background-color: ${(props) => props.primary ? props.theme.colors.darkGray : "white"};
-  color: ${(props) => props.primary ? "white" : props.theme.colors.darkGray};
-  border: ${(props) => props.primary ? "none" : `1px solid ${props.theme.colors.darkGray}`};
+  background-color: ${(props) => (props.primary ? props.theme.colors.darkGray : "white")};
+  color: ${(props) => (props.primary ? "white" : props.theme.colors.darkGray)};
+  border: ${(props) => (props.primary ? "none" : `1px solid ${props.theme.colors.darkGray}`)};
 
   &:hover {
-    background-color: ${(props) => props.primary ? props.theme.colors.gray : "#eee"};
+    background-color: ${(props) => (props.primary ? props.theme.colors.gray : "#eee")};
   }
 `;
 
@@ -66,24 +86,37 @@ const AuctionItemEdit = () => {
   const { auctionItemId } = useParams();
   const navigate = useNavigate();
   const [item, setItem] = useState(null);
-  const [formData, setFormData] = useState(new FormData());
   const [imagePreview, setImagePreview] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    auctionItemSize: "S",
+    auctionItemCategory: "TOP",
+    brand: "",
+    startPrice: "",
+    startTime: "",
+    endTime: "",
+  });
+
+  const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL", "FREE"];
+  const categoryOptions = ["SHOES", "TOP", "BOTTOM", "OUTER", "BAG", "ACCESSORIES", "ETC"];
 
   useEffect(() => {
     const loadItem = async () => {
       const response = await fetchAuctionItemDetail(auctionItemId);
       if (response.success) {
         setItem(response.data);
-        const initialFormData = new FormData();
-        initialFormData.set("name", response.data.name);
-        initialFormData.set("description", response.data.description);
-        initialFormData.set("auctionItemSize", response.data.size);
-        initialFormData.set("auctionItemCategory", response.data.category);
-        initialFormData.set("brand", response.data.brand);
-        initialFormData.set("startPrice", response.data.startPrice);
-        initialFormData.set("startTime", response.data.startTime);
-        initialFormData.set("endTime", response.data.endTime);
-        setFormData(initialFormData);
+
+        setFormData({
+          name: response.data.name,
+          description: response.data.description,
+          auctionItemSize: response.data.size,
+          auctionItemCategory: response.data.category,
+          brand: response.data.brand,
+          startPrice: response.data.startPrice,
+          startTime: new Date(response.data.startTime).toISOString().slice(0, 16),
+          endTime: new Date(response.data.endTime).toISOString().slice(0, 16),
+        });
 
         if (response.data.imageUrl) {
           setImagePreview(`${IMAGE_BASE_URL}${response.data.imageUrl}`);
@@ -98,23 +131,30 @@ const AuctionItemEdit = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    formData.set(name, value);
-    setFormData(formData);
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    formData.set("image", file);
-    setFormData(formData);
 
-    // 이미지 미리보기 설정
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result);
-    reader.readAsDataURL(file);
+    if (file) {
+      setFormData((prev) => ({ ...prev, image: file }));
+
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result);
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handleSubmit = async () => {
-    const response = await updateAuctionItem(auctionItemId, formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const updatedFormData = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      updatedFormData.append(key, value);
+    });
+
+    const response = await updateAuctionItem(auctionItemId, updatedFormData);
     if (response.success) {
       alert("경매 아이템이 수정되었습니다.");
       navigate("/registrations");
@@ -136,24 +176,58 @@ const AuctionItemEdit = () => {
   if (!item) return <p>로딩 중...</p>;
 
   return (
-    <Container>
+    <Form onSubmit={handleSubmit}>
       <Title>경매 아이템 수정</Title>
+
+      <Label>이미지</Label>
       <Input type="file" name="image" onChange={handleImageChange} />
       {imagePreview && <ImagePreview src={imagePreview} alt="Preview" />}
-      <Input type="text" name="name" defaultValue={item.name} onChange={handleInputChange} />
-      <Textarea name="description" defaultValue={item.description} onChange={handleInputChange} />
-      <Input type="text" name="auctionItemSize" defaultValue={item.size} onChange={handleInputChange} />
-      <Input type="text" name="auctionItemCategory" defaultValue={item.category} onChange={handleInputChange} />
-      <Input type="text" name="brand" defaultValue={item.brand} onChange={handleInputChange} />
-      <Input type="number" name="startPrice" defaultValue={item.startPrice} onChange={handleInputChange} />
-      <Input type="datetime-local" name="startTime" defaultValue={item.startTime} onChange={handleInputChange} />
-      <Input type="datetime-local" name="endTime" defaultValue={item.endTime} onChange={handleInputChange} />
-      
+
+      <Label>상품명</Label>
+      <Input type="text" name="name" value={formData.name} onChange={handleInputChange} required />
+
+      <Label>설명</Label>
+      <Input type="text" name="description" value={formData.description} onChange={handleInputChange} />
+
+      <Label>사이즈</Label>
+      <Select name="auctionItemSize" value={formData.auctionItemSize} onChange={handleInputChange}>
+        {sizeOptions.map((size) => (
+          <option key={size} value={size}>
+            {size}
+          </option>
+        ))}
+      </Select>
+
+      <Label>카테고리</Label>
+      <Select name="auctionItemCategory" value={formData.auctionItemCategory} onChange={handleInputChange}>
+        {categoryOptions.map((category) => (
+          <option key={category} value={category}>
+            {category}
+          </option>
+        ))}
+      </Select>
+
+      <Label>브랜드</Label>
+      <Input type="text" name="brand" value={formData.brand} onChange={handleInputChange} required />
+
+      <Label>시작 가격</Label>
+      <Input type="number" name="startPrice" value={formData.startPrice} onChange={handleInputChange} required />
+
+      <Label>시작 시간</Label>
+      <Input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleInputChange} required />
+
+      <Label>종료 시간</Label>
+      <Input type="datetime-local" name="endTime" value={formData.endTime} onChange={handleInputChange} required />
+
       <ButtonGroup>
-        <Button onClick={handleDelete}>삭제</Button>
-        <Button primary onClick={handleSubmit}>수정</Button>
+        <Button type="button" onClick={handleDelete}>
+          삭제
+        </Button>
+        <Button type="submit" primary>
+          수정
+        </Button>
       </ButtonGroup>
-    </Container>
+    </Form>
   );
 };
 
