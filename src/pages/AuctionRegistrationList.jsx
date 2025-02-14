@@ -81,7 +81,7 @@ const AuctionRegistrationList = () => {
       if (response.success) {
         setAuctionItems(response.data.content);
       } else {
-        alert(response.message);
+        // alert(response.message);
       }
     };
 

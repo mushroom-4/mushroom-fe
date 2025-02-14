@@ -9,6 +9,8 @@ import Layout from './components/Layout';
 import AuctionRegistrationList from './pages/AuctionRegistrationList';
 import AuctionItemEdit from './pages/AuctionItemEdit';
 import AuctionItemCreate from './pages/AuctionItemCreate';
+import BidHistory from './pages/BidHistory';
+import BidDetail from './pages/BidDetail';
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
             <Route path="registrations" element={<ProtectedRoute><AuctionRegistrationList /></ProtectedRoute>} />
             <Route path="auction/:auctionItemId/edit" element={<ProtectedRoute><AuctionItemEdit /></ProtectedRoute>} />
             <Route path="auction/create" element={<ProtectedRoute><AuctionItemCreate /></ProtectedRoute>} />
+            <Route path="bids" element={<ProtectedRoute><BidHistory /></ProtectedRoute>} />
+            <Route path="bids/:bidId" element={<ProtectedRoute><BidDetail /></ProtectedRoute>} />
         </Route>
       </Routes>
     </Router>

@@ -19,7 +19,8 @@ export const fetchRegisteredAuctionItems = async () => {
       },
     });
 
-    return response.ok ? await response.json() : Promise.reject(await response.json());
+    return response.ok 
+      ? await response.json() : { content: [], page: {} };
   } catch (error) {
     return { success: false, message: "네트워크 오류 발생" };
   }

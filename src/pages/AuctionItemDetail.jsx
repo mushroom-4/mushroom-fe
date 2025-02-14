@@ -59,7 +59,6 @@ const BidButton = styled.button`
   background-color: ${(props) => (props.disabled ? "#bbb" : props.theme.colors.darkGray)};
   color: white;
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
-  transition: background 0.3s;
 
   &:hover {
     background-color: ${(props) => (props.disabled ? "#bbb" : props.theme.colors.gray)};
@@ -158,7 +157,7 @@ const AuctionItemDetail = () => {
   useEffect(() => {
     if (!item) return;
 
-    const updateTimer = async () => {
+    const updateTimer = () => {
       const now = new Date().getTime();
       const startTime = new Date(item.startTime).getTime();
       const endTime = new Date(item.endTime).getTime();
@@ -169,12 +168,6 @@ const AuctionItemDetail = () => {
       } else if (now >= startTime && now <= endTime) {
         setIsBiddingActive(true);
         setTimeLeft(formatTime(endTime - now));
-
-        const data = await fetchAuctionItemDetail(auctionItemId);
-        setItem((prevItem) => ({
-          ...prevItem,
-          ...data,
-        }));
       } else {
         setIsBiddingActive(false);
         setTimeLeft("해당 경매는 이미 종료되었습니다.");
@@ -184,8 +177,7 @@ const AuctionItemDetail = () => {
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
-  }, [auctionItemId]);
-
+  }, [item]);
 
   const formatTime = (ms) => {
     if (ms <= 0) return "00:00:00";

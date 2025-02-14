@@ -8,6 +8,7 @@
   width: 100%;
   margin: 0;
   padding: 0;
+  color: var(--primary-text-color);
 }
 
 :root {
@@ -24,6 +25,8 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --primary-bg-color: #FFFFFF;
+  --primary-text-color: #000000;
 }
 
 a {
@@ -55,7 +58,6 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -65,6 +67,11 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+input {
+  background-color: var(--primary-bg-color);
+  color: var(--primary-text-color);
 }
 
 @media (prefers-color-scheme: light) {

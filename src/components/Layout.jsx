@@ -8,9 +8,10 @@ const Container = styled.div`
   position: relative;
   width: 100%;
   min-height: 100vh;
+
   &::before {
     content: "";
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -21,6 +22,16 @@ const Container = styled.div`
     opacity: 7%;
     z-index: -1;
   }
+  &::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    z-index: -2;
+  }
 `;
 
 const Header = styled.header`
@@ -29,7 +40,7 @@ const Header = styled.header`
   align-items: center;
   padding: 16px;
   background-color: ${(props) => props.theme.colors.lightGray};
-  position: absolute;
+  position: fixed;
   width: 100%;
   box-shadow: 0 0 10px ${(props) => props.theme.colors.gray};
   z-index: 999;
@@ -48,6 +59,7 @@ const Nav = styled.nav`
 const Section = styled.section`
   margin: 0 auto;
   max-width: 1100px;
+  padding: 0 0 20px;
 `;
 
 const StyledLink = styled(Link)`
@@ -104,9 +116,9 @@ const Layout = () => {
           {context.isAuthenticated ? (
             <>
               <StyledLink to="/registrations">경매물품 관리</StyledLink>
-              <StyledLink to="/">임시</StyledLink>
-              <StyledText>이름: {context.nickname}</StyledText>
+              <StyledLink to="/bids">입찰내역 확인</StyledLink>
               <button onClick={handleLogout}>로그아웃</button>
+              <StyledText>이름: {context.nickname}</StyledText>
             </>
           ) : (
             <>
