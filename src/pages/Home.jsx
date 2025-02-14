@@ -119,6 +119,8 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  
+
   useEffect(() => {
     const loadAuctionItems = async () => {
       const data = await fetchAuctionItems(currentPage);
