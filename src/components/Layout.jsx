@@ -78,6 +78,12 @@ const LogoImage = styled.img`
   border-radius: 10%;
 `;
 
+const StyledText = styled.span`
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+`;
+
 const Layout = () => {
   const navigate = useNavigate();
   const context = useAuth();
@@ -97,7 +103,7 @@ const Layout = () => {
         <Nav>
           {context.isAuthenticated ? (
             <>
-              <StyledLink to="/mypage">마이페이지</StyledLink>
+              <StyledText>이름: {context.nickname}</StyledText>
               <button onClick={handleLogout}>로그아웃</button>
             </>
           ) : (

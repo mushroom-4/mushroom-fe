@@ -34,10 +34,7 @@ export const fetchAuctionItemDetail = async (auctionItemId) => {
  * 입찰 요청 API (Authorization 포함)
  */
 export const placeBid = async (auctionItemId, biddingPrice) => {
-  const token = getToken();
-
-  console.log(token);
-  
+  const token = getToken(); 
   if (!token) {
     return { success: false, message: "로그인이 필요합니다." };
   }

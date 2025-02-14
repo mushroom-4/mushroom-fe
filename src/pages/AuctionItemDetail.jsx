@@ -56,12 +56,13 @@ const BidButton = styled.button`
   font-size: 16px;
   border-radius: 8px;
   border: none;
-  background-color: ${(props) => props.theme.colors.darkGray};
+  background-color: ${(props) => (props.disabled ? "#bbb" : props.theme.colors.darkGray)};
   color: white;
-  cursor: pointer;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  transition: background 0.3s;
 
   &:hover {
-    background-color: ${(props) => props.theme.colors.gray};
+    background-color: ${(props) => (props.disabled ? "#bbb" : props.theme.colors.gray)};
   }
 `;
 
@@ -126,12 +127,22 @@ const ConfirmButton = styled.button`
   }
 `;
 
+const TimerText = styled.p`
+  font-size: 18px;
+  font-weight: bold;
+  color: ${(props) => props.theme.colors.darkGray};
+  margin-top: 10px;
+`;
+
+
 const AuctionItemDetail = () => {
   const { auctionItemId } = useParams(); // URL에서 auctionItemId 가져오기
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [biddingPrice, setBiddingPrice] = useState("");
+  const [timeLeft, setTimeLeft] = useState("");
+  const [isBiddingActive, setIsBiddingActive] = useState(false);
 
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
@@ -143,6 +154,46 @@ const AuctionItemDetail = () => {
 
     loadAuctionItemDetail();
   }, [auctionItemId]);
+
+  useEffect(() => {
+    if (!item) return;
+
+    const updateTimer = async () => {
+      const now = new Date().getTime();
+      const startTime = new Date(item.startTime).getTime();
+      const endTime = new Date(item.endTime).getTime();
+
+      if (now < startTime) {
+        setIsBiddingActive(false);
+        setTimeLeft(formatTime(startTime - now));
+      } else if (now >= startTime && now <= endTime) {
+        setIsBiddingActive(true);
+        setTimeLeft(formatTime(endTime - now));
+
+        const data = await fetchAuctionItemDetail(auctionItemId);
+        setItem((prevItem) => ({
+          ...prevItem,
+          ...data,
+        }));
+      } else {
+        setIsBiddingActive(false);
+        setTimeLeft("해당 경매는 이미 종료되었습니다.");
+      }
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [auctionItemId]);
+
+
+  const formatTime = (ms) => {
+    if (ms <= 0) return "00:00:00";
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
 
   if (loading) return <Loading>로딩 중...</Loading>;
 
@@ -185,7 +236,18 @@ const AuctionItemDetail = () => {
         <DetailItem>⏳ 종료 시간: {new Date(item.endTime).toLocaleString("ko-KR")}</DetailItem>
         <DetailItem>🔍 상태: {item.status}</DetailItem>
       </Info>
-      <BidButton onClick={handleOpenModal}>입찰하기</BidButton>
+      {/* ✅ 타이머 표시 */}
+      {new Date().getTime() < new Date(item.startTime).getTime() ? (
+          <TimerText>⏳ 입찰까지 남은 시간: {timeLeft}</TimerText>
+        ) : new Date().getTime() < new Date(item.endTime).getTime() ? (
+          <TimerText>⏳ 입찰 종료까지 남은 시간: {timeLeft}</TimerText>
+        ) : (
+          <TimerText>{timeLeft}</TimerText>
+        )}
+      {/* ✅ 버튼 상태 제어 */}
+      <BidButton onClick={handleOpenModal} disabled={!isBiddingActive}>
+        입찰하기
+      </BidButton>
       {isModalOpen && (
       <ModalOverlay>
         <ModalContent>
