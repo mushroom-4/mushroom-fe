@@ -29,29 +29,12 @@ const Input = styled.input`
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: white !important;
-  color: black;
-
-  &::placeholder {
-    color: #888;
-  }
-
-  &[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    cursor: pointer;
-  }
 `;
 
 const Select = styled.select`
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: white !important;
-  color: black;
 `;
 
 const ButtonGroup = styled.div`
@@ -163,6 +146,12 @@ const AuctionItemEdit = () => {
     }
   };
 
+  const handlePriceChange = (e) => {
+    let value = Number(e.target.value);
+    
+    setFormData((prev) => ({ ...prev, startPrice: value }));
+  };
+
   const handleDelete = async () => {
     const response = await deleteAuctionItem(auctionItemId);
     if (response.success) {
@@ -211,7 +200,15 @@ const AuctionItemEdit = () => {
       <Input type="text" name="brand" value={formData.brand} onChange={handleInputChange} required />
 
       <Label>시작 가격</Label>
-      <Input type="number" name="startPrice" value={formData.startPrice} onChange={handleInputChange} required />
+      <Input
+        type="number"
+        name="startPrice"
+        value={formData.startPrice}
+        onChange={handlePriceChange}
+        step="1000"
+        min="1000"
+        required
+      />
 
       <Label>시작 시간</Label>
       <Input type="datetime-local" name="startTime" value={formData.startTime} onChange={handleInputChange} required />

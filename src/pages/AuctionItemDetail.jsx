@@ -108,6 +108,7 @@ const CancelButton = styled.button`
   padding: 8px 16px;
   border-radius: 8px;
   background: white;
+  color: black;
   border: 1px solid ${(props) => props.theme.colors.gray};
   cursor: pointer;
 `;

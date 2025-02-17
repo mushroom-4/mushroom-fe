@@ -66,9 +66,42 @@ button:hover {
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid #999999;
 }
 
+input {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white !important;
+  color: black;
+}
+
+input::placeholder {
+  color: #888;
+}
+
+
+input[type="datetime-local"] {
+  appearance: none;
+  position: relative;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(50%);
+  cursor: pointer;
+}
+
+select {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white !important;
+  color: black;
+}
+
+input:focus,
+input:focus-visible {
+  outline: 2px solid #999999;
+}
 
 
 @media (prefers-color-scheme: light) {
