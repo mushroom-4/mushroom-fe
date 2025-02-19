@@ -11,6 +11,8 @@ import AuctionItemEdit from './pages/item_manage/AuctionItemEdit';
 import AuctionItemCreate from './pages/item_manage/AuctionItemCreate';
 import BidHistory from './pages/bid_history/BidHistory';
 import BidDetail from './pages/bid_history/BidDetail';
+import PaymentSuccess from "./pages/bid_history/PaymentSuccess";
+import PaymentFail from "./pages/bid_history/PaymentFail";
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
             <Route path="auction/create" element={<ProtectedRoute><AuctionItemCreate /></ProtectedRoute>} />
             <Route path="bids" element={<ProtectedRoute><BidHistory /></ProtectedRoute>} />
             <Route path="bids/:bidId" element={<ProtectedRoute><BidDetail /></ProtectedRoute>} />
+            <Route path="payment-success" element={<PaymentSuccess />} />
+            <Route path="payment-fail" element={<PaymentFail />} />
         </Route>
       </Routes>
     </Router>
