@@ -78,7 +78,9 @@ const AuctionRegistrationList = () => {
   useEffect(() => {
     const loadAuctionItems = async () => {
       const response = await fetchRegisteredAuctionItems();
-      setAuctionItems(response.data.content);
+      if (response.success) {
+        setAuctionItems(response.data.content);
+      }
     };
 
     loadAuctionItems();

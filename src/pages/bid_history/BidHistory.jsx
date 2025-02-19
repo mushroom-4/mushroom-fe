@@ -108,8 +108,10 @@ const BidHistory = () => {
   useEffect(() => {
     const loadBidHistory = async () => {
       const response = await fetchBidHistory(currentPage);
-      setBids(response.data.content);
-      setTotalPages(response.data.page.totalPages);
+      if (response.success) {
+        setBids(response.data.content);
+        setTotalPages(response.data.page.totalPages);
+      }
     };
 
     loadBidHistory();
