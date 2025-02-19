@@ -2,6 +2,8 @@ export const API_ENDPOINTS = {
   AUTH: {
     REGISTER: "/v2/auth/register",
     LOGIN: "/v1/auth/login",
+    UPDATE_INFO: "/v1/users/info",
+    UPDATE_PASSWORD: "/v1/users/password",
   },
   AUCTION: {
     LIST: "/v1/auction-items",

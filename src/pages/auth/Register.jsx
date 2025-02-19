@@ -19,6 +19,7 @@ const Form = styled.form`
   box-shadow: 0 0 10px ${(props) => props.theme.colors.gray};
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 20px;
 `;
 
@@ -39,8 +40,8 @@ const FileLabel = styled.label`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 300px;
-  height: 300px;
+  width: 150px;
+  height: 150px;
   border-radius: 100%;
   border: 2px dashed ${(props) => props.theme.colors.gray};
   cursor: pointer;
