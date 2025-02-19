@@ -9,13 +9,13 @@ const Wrapper = styled.div`
   color: ${(props) => props.theme.colors.darkGray};
 `;
 
-const Search = () => {
+const Wishlist = () => {
 
   return (
     <Wrapper>
-      <h2>검색 페이지 입니다.</h2>
+      <h2>좋아요한 물품을 보는 페이지 입니다.</h2>
     </Wrapper>
   );
 };
 
-export default Search;
+export default Wishlist;
