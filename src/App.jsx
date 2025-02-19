@@ -1,16 +1,16 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import MyPage from './pages/MyPage';
+import Home from './pages/main/Home';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import MyPage from './pages/auth/MyPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import AuctionItemDetail from './pages/AuctionItemDetail';
+import AuctionItemDetail from './pages/main/AuctionItemDetail';
 import Layout from './components/Layout';
-import AuctionRegistrationList from './pages/AuctionRegistrationList';
-import AuctionItemEdit from './pages/AuctionItemEdit';
-import AuctionItemCreate from './pages/AuctionItemCreate';
-import BidHistory from './pages/BidHistory';
-import BidDetail from './pages/BidDetail';
+import AuctionRegistrationList from './pages/item_manage/AuctionRegistrationList';
+import AuctionItemEdit from './pages/item_manage/AuctionItemEdit';
+import AuctionItemCreate from './pages/item_manage/AuctionItemCreate';
+import BidHistory from './pages/bid_history/BidHistory';
+import BidDetail from './pages/bid_history/BidDetail';
 
 function App() {
   return (

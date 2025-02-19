@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { createAuctionItem } from "../api/auctionRegistration";
+import { createAuctionItem } from "../../api/auctionRegistration";
 
 const Form = styled.form`
   max-width: 600px;

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
-import { register } from '../api/auth';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
+import { login } from '../../api/auth';
 
 const Wrapper = styled.div`
   display: flex;
@@ -38,10 +38,10 @@ const Button = styled.button`
   cursor: pointer;
 `;
 
-const Register = () => {
+const Login = () => {
   const navigate = useNavigate();
   const context = useAuth();
-  const [form, setForm] = useState({ nickname: "", email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -49,26 +49,26 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = await register(form.nickname, form.email, form.password);
+    const data = await login(form.email, form.password);
     if (data.success) {
       context.login(data.data.bearerToken);
-      alert("회원가입 성공");
+      alert("로그인 성공");
       navigate("/");
     } else {
       alert(data.message);
     }
   };
 
+
   return (
-    <Wrapper>
-      <Form onSubmit={handleSubmit}>
-        <Input type="text" name="nickname" placeholder="닉네임" onChange={handleChange} required />
-        <Input type="email" name="email" placeholder="이메일" onChange={handleChange} required />
-        <Input type="password" name="password" placeholder="비밀번호" onChange={handleChange} required />
-        <Button type="submit">회원가입</Button>
-      </Form>
-    </Wrapper>
+      <Wrapper>
+        <Form onSubmit={handleSubmit}>
+          <Input type="email" name="email" placeholder="이메일" onChange={handleChange} required />
+          <Input type="password" name="password" placeholder="비밀번호" onChange={handleChange} required />
+          <Button type="submit">로그인</Button>
+        </Form>
+      </Wrapper>
   );
 };
 
-export default Register;
+export default Login;

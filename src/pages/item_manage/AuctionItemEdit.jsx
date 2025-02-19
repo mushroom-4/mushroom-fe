@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { fetchAuctionItemDetail, updateAuctionItem, deleteAuctionItem } from "../api/auctionRegistration";
-import { IMAGE_BASE_URL } from "../config";
+import { fetchAuctionItemDetail, updateAuctionItem, deleteAuctionItem } from "../../api/auctionRegistration";
+import { IMAGE_BASE_URL } from "../../config";
 
 const Form = styled.form`
   max-width: 600px;

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { fetchAuctionItems } from "../api/auctionItem";
-import defaultImage from "../assets/background.png";
+import { fetchAuctionItems } from "../../api/auctionItem";
+import defaultImage from "../../assets/background.png";
 import { useNavigate } from "react-router-dom";
-import {IMAGE_BASE_URL} from "../config";
+import {IMAGE_BASE_URL} from "../../config";
 
 const Container = styled.div`
   display: flex;

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { fetchRegisteredAuctionItems } from "../api/auctionRegistration";
-import defaultImage from "../assets/background.png";
-import {IMAGE_BASE_URL} from "../config";
+import { fetchRegisteredAuctionItems } from "../../api/auctionRegistration";
+import defaultImage from "../../assets/background.png";
+import {IMAGE_BASE_URL} from "../../config";
 
 const Container = styled.div`
   padding: 20px;

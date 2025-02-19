@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { fetchBidHistory } from "../api/bid";
-import defaultImage from "../assets/background.png";
-import {IMAGE_BASE_URL} from "../config";
+import { fetchBidHistory } from "../../api/bid";
+import defaultImage from "../../assets/background.png";
+import {IMAGE_BASE_URL} from "../../config";
 
 const Container = styled.div`
   max-width: 800px;

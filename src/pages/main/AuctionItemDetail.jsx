@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
-import { fetchAuctionItemDetail, placeBid } from "../api/auctionItem";
-import defaultImage from "../assets/background.png";
-import {IMAGE_BASE_URL} from "../config";
+import { fetchAuctionItemDetail, placeBid } from "../../api/auctionItem";
+import defaultImage from "../../assets/background.png";
+import {IMAGE_BASE_URL} from "../../config";
 
 const Container = styled.div`
   max-width: 800px;

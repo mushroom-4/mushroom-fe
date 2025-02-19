@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
-import { fetchBidDetail } from "../api/bid";
-import defaultImage from "../assets/background.png";
-import {IMAGE_BASE_URL} from "../config";
+import { fetchBidDetail } from "../../api/bid";
+import defaultImage from "../../assets/background.png";
+import {IMAGE_BASE_URL} from "../../config";
 
 
 const Container = styled.div`
