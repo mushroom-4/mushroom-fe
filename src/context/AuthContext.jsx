@@ -1,31 +1,31 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getToken, setToken, removeToken, getNicknameFromToken } from "../utils/auth";
+import { getToken, setToken, removeToken, getUserInfoFromToken } from "../utils/auth";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!getToken());
-  const [nickname, setNickname] = useState(getNicknameFromToken());
+  const [user, setUser] = useState(getUserInfoFromToken()); // 닉네임 + 프로필 이미지 포함
 
   useEffect(() => {
     setIsAuthenticated(!!getToken());
-    setNickname(getNicknameFromToken());
+    setUser(getUserInfoFromToken());
   }, []);
 
   const login = (token) => {
     setToken(token);
     setIsAuthenticated(true);
-    setNickname(getNicknameFromToken());
+    setUser(getUserInfoFromToken());
   };
 
   const logout = () => {
     removeToken();
     setIsAuthenticated(false);
-    setNickname(null);
+    setUser({ nickname: null, imageUrl: null });
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, nickname, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

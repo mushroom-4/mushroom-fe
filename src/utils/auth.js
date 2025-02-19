@@ -14,14 +14,17 @@ export const isAuthenticated = () => {
   return !!getToken();
 };
 
-export const getNicknameFromToken = () => {
+export const getUserInfoFromToken = () => {
   const token = getToken();
-  if (!token) return null;
+  if (!token) return { nickname: null, imageUrl: null };
 
   try {
     const payload = JSON.parse(atob(token.split(".")[1])); // JWT Payload 디코딩
-    return payload.nickname;
+    return {
+      nickname: payload.nickname || null,
+      imageUrl: payload.imageUrl || null, // 프로필 이미지 URL 추가
+    };
   } catch (error) {
-    return null;
+    return { nickname: null, imageUrl: null };
   }
 };

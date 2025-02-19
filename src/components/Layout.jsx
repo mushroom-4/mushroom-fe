@@ -118,7 +118,7 @@ const Layout = () => {
               <StyledLink to="/registrations">경매물품 관리</StyledLink>
               <StyledLink to="/bids">입찰내역 확인</StyledLink>
               <button onClick={handleLogout}>로그아웃</button>
-              <StyledText>이름: {context.nickname}</StyledText>
+              <StyledText>이름: {context.user.nickname}</StyledText>
             </>
           ) : (
             <>

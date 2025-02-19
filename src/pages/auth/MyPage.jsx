@@ -11,11 +11,12 @@ const Wrapper = styled.div`
 `;
 
 const MyPage = () => {
-  const { nickname } = useAuth();
+  const { user } = useAuth();
 
   return (
     <Wrapper>
-      <h2>{nickname}님의 마이페이지 입니다.</h2>
+      <h2>{user.nickname}님의 마이페이지 입니다.</h2>
+      <img src={user.imageUrl} alt="profileImage"/>
     </Wrapper>
   );
 };
