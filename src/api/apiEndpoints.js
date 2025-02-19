@@ -1,17 +1,18 @@
 export const API_ENDPOINTS = {
   AUTH: {
-    REGISTER: "/auth/register",
-    LOGIN: "/auth/login",
+    REGISTER: "/v1/auth/register",
+    LOGIN: "/v1/auth/login",
   },
   AUCTION: {
-    LIST: "/auction-items",
-    CONTROL: (id) => `/auction-items/${id}`,
-    DETAIL: (id) => `/auction-items/${id}/info`,
-    BID: (id) => `/auction-items/${id}/bids`,
+    LIST: "/v1/auction-items",
+    CONTROL: (id) => `/v1/auction-items/${id}`,
+    DETAIL: (id) => `/v1/auction-items/${id}/info`,
+    BID: (id) => `/v1/auction-items/${id}/bids`,
+    PAYMENT: "/v2/payments/confirm/widget",
   },
   USER: {
-    REGISTRATIONS: "/users/registrations",
-    BIDS: "/users/bids",
-    BID_DETAIL: (bidId) => `/users/bids/${bidId}`,
+    REGISTRATIONS: "/v1/users/registrations",
+    BIDS: "/v1/users/bids",
+    BID_DETAIL: (bidId) => `/v1/users/bids/${bidId}`,
   },
 };
