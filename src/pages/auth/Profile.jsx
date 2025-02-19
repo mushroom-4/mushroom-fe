@@ -134,13 +134,27 @@ const Profile = () => {
         </FileLabel>
         <FileInput id="imageUpload" type="file" onChange={handleImageChange} />
 
-        <Input type="text" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="닉네임" required />
+        <Input type="text" value={nickname} onChange={(e) => setNickname(e.target.value)} placeholder="닉네임" maxLength={10} required />
         <Button type="submit">프로필 수정</Button>
       </Form>
 
       <Form onSubmit={handlePasswordChange}>
-        <Input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="현재 비밀번호" required />
-        <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="새 비밀번호" required />
+        <Input
+          type="password"
+          value={oldPassword}
+          onChange={(e) => setOldPassword(e.target.value)}
+          placeholder="현재 비밀번호"
+          minLength={8}
+          maxLength={20}
+          required />
+        <Input 
+          type="password" 
+          value={newPassword} 
+          onChange={(e) => setNewPassword(e.target.value)} 
+          placeholder="새 비밀번호" 
+          minLength={8}
+          maxLength={20}
+          required />
         <Button type="submit">비밀번호 변경</Button>
       </Form>
     </Wrapper>

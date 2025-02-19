@@ -113,9 +113,9 @@ const Register = () => {
         </FileLabel>
         <FileInput id="imageUpload" type="file" onChange={handleImageChange} />
 
-        <Input type="text" name="nickname" placeholder="닉네임" onChange={handleChange} required />
+        <Input type="text" name="nickname" placeholder="닉네임" onChange={handleChange} maxLength={10} required />
         <Input type="email" name="email" placeholder="이메일" onChange={handleChange} required />
-        <Input type="password" name="password" placeholder="비밀번호" onChange={handleChange} required />
+        <Input type="password" name="password" placeholder="비밀번호" onChange={handleChange} minLength={8} maxLength={20} required />
         <Button type="submit">회원가입</Button>
       </Form>
     </Wrapper>
