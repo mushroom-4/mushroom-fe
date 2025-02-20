@@ -61,7 +61,7 @@ const HeaderDummy = styled.div`
 const Nav = styled.nav`
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 30px;
 `;
 
 const Section = styled.section`
@@ -101,13 +101,13 @@ const ProfileContainer = styled.div`
 `;
 
 const ProfileImage = styled.img`
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid ${(props) => props.theme.colors.gray};
   &:hover {
-    opacity: 0.5;
+    opacity: ${(props) => (props.hover ? "0.5" : "1")};
   }
 `;
 
@@ -128,13 +128,18 @@ const DropdownItem = styled.div`
   align-items: center;
   transition: background 0.5s;
   white-space: nowrap;
-  
+  background-color: ${(props) => (props.dark ? props.theme.colors.darkGray : "white")};
+  color: ${(props) => (props.dark ? "white" : props.theme.colors.darkGray)};
+
   &:first-child {
     border-bottom: 1px solid ${(props) => props.theme.colors.lightGray};
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   &:hover {
-    background: ${(props) => props.theme.colors.lightGray};
+    background: ${(props) => (props.dark ? props.theme.colors.gray : props.theme.colors.lightGray)};
   }
 `;
 
@@ -183,12 +188,12 @@ const Layout = () => {
             {context.isAuthenticated ? (
               <>
                 <StyledLink to="/search">검색</StyledLink>
-
+                {context.user.userRole === "ADMIN" && <StyledLink to="/admin">관리자 물품 관리</StyledLink>}
                 <ProfileContainer ref={dropdownRef} onClick={() => setDropdownOpen(!dropdownOpen)}>
-                  <ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" />
+                  <ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" hover />
                   {dropdownOpen && (
                     <DropdownMenu>
-                      <DropdownItem onClick={() => navigate("/profile")}><strong>{context.user.nickname}</strong>&nbsp;님의 프로필</DropdownItem>
+                      <DropdownItem onClick={() => navigate("/profile")} dark><ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" /><strong>{context.user.nickname}</strong></DropdownItem>
                       <DropdownItem onClick={() => navigate("/wishlist")}>찜한 물품 보기</DropdownItem>
                       <DropdownItem onClick={() => navigate("/bids")}>입찰 내역 관리</DropdownItem>
                       <DropdownItem onClick={() => navigate("/registrations")}>경매 물품 관리</DropdownItem>

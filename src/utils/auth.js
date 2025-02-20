@@ -22,7 +22,9 @@ export const getUserInfoFromToken = () => {
     const payload = JSON.parse(atob(token.split(".")[1])); // JWT Payload 디코딩
     return {
       nickname: payload.nickname || null,
-      imageUrl: payload.imageUrl || null, // 프로필 이미지 URL 추가
+      imageUrl: payload.imageUrl || null,
+      email: payload.email || null,
+      userRole: payload.userRole || null,
     };
   } catch (error) {
     return { nickname: null, imageUrl: null };
