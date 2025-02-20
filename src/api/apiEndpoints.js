@@ -17,4 +17,8 @@ export const API_ENDPOINTS = {
     BIDS: "/v1/users/bids",
     BID_DETAIL: (bidId) => `/v1/users/bids/${bidId}`,
   },
+  ADMIN: {
+    ITEM_LIST: "/v1/admin/auction-items",
+    AUCTION_ITEM_CHANGE_STATUS: (id) => `/v1/admin/auction-items/${id}`,
+  }
 };

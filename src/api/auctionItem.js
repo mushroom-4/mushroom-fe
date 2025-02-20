@@ -15,3 +15,14 @@ export const fetchAuctionItemDetail = (auctionItemId) => {
 export const placeBid = (auctionItemId, biddingPrice) => {
   return request(API_ENDPOINTS.AUCTION.BID(auctionItemId), "POST", { biddingPrice });
 };
+
+/** ✅ 경매 물품 목록 조회 (어드민) */
+export const fetchAdminAuctionItems = (page = 1, status = []) => {
+  const statusQuery = status.map(s => `status=${s}`).join("&");
+  return request(`${API_ENDPOINTS.ADMIN.ITEM_LIST}?page=${page}&${statusQuery}`, "GET", null, true, false);
+};
+
+/** ✅ 경매 물품 상태 변경 (어드민) */
+export const setStatusAdminAuctionItems = (auctionItemId, action) => {
+  return request(API_ENDPOINTS.ADMIN.AUCTION_ITEM_CHANGE_STATUS(auctionItemId), "PATCH", { action }, true, false);
+};
