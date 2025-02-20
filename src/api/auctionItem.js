@@ -36,3 +36,8 @@ export const likeAuctionItems = (auctionItemId) => {
 export const unlikeAuctionItems = (auctionItemId) => {
   return request(API_ENDPOINTS.LIKE.SET_LIKE(auctionItemId), "DELETE", null, true, false);
 };
+
+/** ✅ 좋아요한 경매 물품들 */
+export const allLikeAuctionItems = (page = 1) => {
+  return request(`${API_ENDPOINTS.LIKE.GET_LIKE_ITEMS}?page=${page}`, "GET", null, true, false);
+};

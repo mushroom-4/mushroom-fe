@@ -72,10 +72,11 @@ const Price = styled.p`
 
 const Status = styled.p`
   font-size: 12px;
-  color: ${(props) => (props.isWaiting ? props.theme.colors.lightGray : props.theme.colors.darkGray)};
-  background-color: ${(props) => (!props.isWaiting ? props.theme.colors.lightGray : props.theme.colors.darkGray)};
   padding: 2px 5px;
   border-radius: 5px;
+
+  color: ${(props) => props.status !== "WAITING" ? props.theme.colors.lightGray : props.theme.colors.darkGray};
+  background-color: ${(props) => props.status === "WAITING" ? props.theme.colors.lightGray : props.theme.colors.darkGray};
 `;
 
 const Timestamp = styled.p`
@@ -142,11 +143,16 @@ const Home = () => {
               />
             </ImageWrapper>
             <Content>
-              <Timestamp>{new Date(item.startTime).toLocaleString("ko-KR")} 시작</Timestamp>
-              <Title>{item.brand}</Title>
-              <Description>{item.name}</Description>
-              <Status isWaiting={item.status === 'WAITING'}>{item.status}</Status>
+              {
+                item.status === "WAITING"
+                ? <Timestamp>{new Date(item.startTime).toLocaleString("ko-KR")} <strong>시작</strong></Timestamp>
+                : <Timestamp>{new Date(item.endTime).toLocaleString("ko-KR")} <strong>종료</strong></Timestamp>
+              }
+              
+              <Title>{item.name}</Title>
+              <Description>브랜드: {item.brand}</Description>
               <Price>{item.startPrice.toLocaleString()}원</Price>
+              <Status status={item.status}>{item.status}</Status>
             </Content>
           </Card>
         ))}

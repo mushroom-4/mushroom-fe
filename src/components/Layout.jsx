@@ -198,10 +198,10 @@ const Layout = () => {
                   {dropdownOpen && (
                     <DropdownMenu>
                       <DropdownItem onClick={() => navigate("/profile")} dark><ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" /><strong>{context.user.nickname}</strong></DropdownItem>
-                      <DropdownItem onClick={() => navigate("/wishlist")}>관심있는 물품 보기</DropdownItem>
-                      <DropdownItem onClick={() => navigate("/bids")}>입찰 내역 관리</DropdownItem>
-                      <DropdownItem onClick={() => navigate("/registrations")}>경매 물품 관리</DropdownItem>
                       <DropdownItem onClick={() => navigate("/notices")}>공지 사항</DropdownItem>
+                      <DropdownItem onClick={() => navigate("/wishlist")}>관심있는 물품</DropdownItem>
+                      <DropdownItem onClick={() => navigate("/registrations")}>물품 관리</DropdownItem>
+                      <DropdownItem onClick={() => navigate("/bids")}>입찰 내역 관리</DropdownItem>
                       <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
                     </DropdownMenu>
                   )}
