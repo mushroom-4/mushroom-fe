@@ -26,3 +26,13 @@ export const fetchAdminAuctionItems = (page = 1, status = []) => {
 export const setStatusAdminAuctionItems = (auctionItemId, action) => {
   return request(API_ENDPOINTS.ADMIN.AUCTION_ITEM_CHANGE_STATUS(auctionItemId), "PATCH", { action }, true, false);
 };
+
+/** ✅ 경매 물품에 좋아요 */
+export const likeAuctionItems = (auctionItemId) => {
+  return request(API_ENDPOINTS.LIKE.SET_LIKE(auctionItemId), "POST", null, true, false);
+};
+
+/** ✅ 경매 물품에 좋아요 취소 */
+export const unlikeAuctionItems = (auctionItemId) => {
+  return request(API_ENDPOINTS.LIKE.SET_LIKE(auctionItemId), "DELETE", null, true, false);
+};

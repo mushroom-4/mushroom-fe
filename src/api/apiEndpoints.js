@@ -20,5 +20,8 @@ export const API_ENDPOINTS = {
   ADMIN: {
     ITEM_LIST: "/v1/admin/auction-items",
     AUCTION_ITEM_CHANGE_STATUS: (id) => `/v1/admin/auction-items/${id}`,
+  },
+  LIKE: {
+    SET_LIKE: (auctionItemId) => `/v1/auction-items/${auctionItemId}/likes`,
   }
 };

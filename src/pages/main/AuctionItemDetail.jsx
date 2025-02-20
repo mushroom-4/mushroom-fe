@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { fetchAuctionItemDetail, placeBid } from "../../api/auctionItem";
+import { fetchAuctionItemDetail, likeAuctionItems, placeBid } from "../../api/auctionItem";
 import defaultImage from "../../assets/background.png";
 import {IMAGE_BASE_URL} from "../../config";
+import { isAuthenticated } from "../../utils/auth";
 
 const Container = styled.div`
   max-width: 800px;
@@ -12,6 +13,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 `;
 
 const Image = styled.img`
@@ -61,6 +63,21 @@ const BidButton = styled.button`
 
   &:hover {
     background-color: ${(props) => (props.disabled ? "#bbb" : props.theme.colors.gray)};
+  }
+`;
+
+const LikeButton = styled.button`
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: ${(props) => props.theme.colors.darkGray};
+  color: white;
+  cursor: pointer;
+  &:hover {
+    background-color: ${(props) => props.theme.colors.gray};
   }
 `;
 
@@ -135,6 +152,8 @@ const TimerText = styled.p`
 
 
 const AuctionItemDetail = () => {
+  const navigate = useNavigate();
+  const isLogin = isAuthenticated();
   const { auctionItemId } = useParams(); // URL에서 auctionItemId 가져오기
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -214,8 +233,18 @@ const AuctionItemDetail = () => {
     }
   };
 
+  const handleLike = async () => {
+    const response = await likeAuctionItems(auctionItemId);
+    if (response.success) {
+      alert("관심 상품에 등록했습니다.");
+    } else {
+      alert(response.message);
+    }
+  }
+
   return (
     <Container>
+      {isLogin ? <LikeButton onClick={handleLike}>관심 갖기</LikeButton>: <></>}
       <Image src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage} alt={item.name} />
       <Info>
         <Title>{item.brand} - {item.name}</Title>
@@ -227,18 +256,27 @@ const AuctionItemDetail = () => {
         <DetailItem>⏳ 종료 시간: {new Date(item.endTime).toLocaleString("ko-KR")}</DetailItem>
         <DetailItem>🔍 상태: {item.status}</DetailItem>
       </Info>
-      {/* ✅ 타이머 표시 */}
-      {new Date().getTime() < new Date(item.startTime).getTime() ? (
-          <TimerText>⏳ 입찰까지 남은 시간: {timeLeft}</TimerText>
+      {isLogin ? (
+        <>
+        {new Date().getTime() < new Date(item.startTime).getTime() ? (
+          <TimerText>⏳ 입찰 시작까지 남은 시간: {timeLeft}</TimerText>
         ) : new Date().getTime() < new Date(item.endTime).getTime() ? (
           <TimerText>⏳ 입찰 종료까지 남은 시간: {timeLeft}</TimerText>
         ) : (
           <TimerText>{timeLeft}</TimerText>
         )}
-      {/* ✅ 버튼 상태 제어 */}
-      <BidButton onClick={handleOpenModal} disabled={!isBiddingActive}>
-        입찰하기
-      </BidButton>
+        <BidButton onClick={handleOpenModal} disabled={!isBiddingActive}>
+          입찰하러 가기
+        </BidButton>
+        </>
+      ) : (
+        <>
+        <TimerText>입찰은 로그인 후 이용할 수 있어요!</TimerText>
+        <BidButton onClick={() => navigate("/login")}>
+          로그인하러 가기
+        </BidButton>
+        </>
+      )}
       {isModalOpen && (
       <ModalOverlay>
         <ModalContent>
