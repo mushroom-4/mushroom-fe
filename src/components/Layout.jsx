@@ -74,6 +74,7 @@ const StyledLink = styled(Link)`
   text-decoration: none;
   font-size: 18px;
   color: black;
+  -webkit-user-drag: none;
 
   &:hover {
     color: ${(props) => props.theme.colors.gray};
@@ -85,12 +86,14 @@ const HomeLogoLink = styled(Link)`
   font-size: 24px;
   display: flex;
   align-items: center;
+  -webkit-user-drag: none;
 `;
 
 const LogoImage = styled.img`
   width: 40px;
   height: 40px;
   border-radius: 10%;
+  -webkit-user-drag: none;
 `;
 
 const ProfileContainer = styled.div`
@@ -106,6 +109,7 @@ const ProfileImage = styled.img`
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid ${(props) => props.theme.colors.gray};
+  -webkit-user-drag: none;
   &:hover {
     opacity: ${(props) => (props.hover ? "0.5" : "1")};
   }
