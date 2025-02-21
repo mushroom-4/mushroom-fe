@@ -6,6 +6,8 @@ import mainLogo from "../assets/mainLogo.png";
 import backgroundImage from "../assets/background.png";
 import defaultProfile from "../assets/default-profile.png"; // 기본 프로필 이미지
 
+
+
 const Container = styled.div`
   position: relative;
   width: 100%;
@@ -42,7 +44,7 @@ const HeaderContainer = styled.div`
   width: 100%;
   padding: 16px;
   box-shadow: 0 0 10px ${(props) => props.theme.colors.gray};
-  z-index: 999;
+  z-index: 998;
 `;
 
 const Header = styled.header`
@@ -62,6 +64,59 @@ const Nav = styled.nav`
   display: flex;
   align-items: center;
   gap: 30px;
+`;
+
+const SearchButton = styled.button`
+  font-size: 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: black;
+
+  &:hover {
+    color: ${(props) => props.theme.colors.gray};
+  }
+`;
+
+const SearchContainer = styled.div`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 10px;
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  opacity: ${(props) => (props.visible ? 1 : 0)};
+  transform: ${(props) => (props.visible ? "translate(-50%, -50%)" : "translate(-50%, -60%)")};
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  z-index: ${(props) => (props.visible ? '999' : '-1')};
+`;
+
+const SearchInput = styled.input`
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 10px;
+  background: ${(props) => props.theme.colors.lightGray};
+`;
+
+const SearchIcon = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 18px;
+  color: ${(props) => props.theme.colors.darkGray};
+
+  &:hover {
+    color: ${(props) => props.theme.colors.gray};
+  }
 `;
 
 const Section = styled.section`
@@ -156,7 +211,10 @@ const Layout = () => {
   const navigate = useNavigate();
   const context = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [keyword, setKeyword] = useState("");
   const dropdownRef = useRef(null);
+  const searchRef = useRef(null);
 
 
   const handleLogout = () => {
@@ -164,6 +222,44 @@ const Layout = () => {
     alert("로그아웃되었습니다.");
     navigate("/");
   };
+
+  const handleSearch = () => {
+    if (keyword.trim()) {
+      const currentParams = new URLSearchParams(window.location.search);
+  
+      if (currentParams.has("keyword")) {
+        currentParams.set("keyword", encodeURIComponent(keyword));
+      } else {
+        currentParams.append("keyword", encodeURIComponent(keyword));
+      }
+  
+      navigate(`/?${currentParams.toString()}`);
+      setSearchOpen(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") handleSearch();
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        searchRef.current && !searchRef.current.contains(event.target) && 
+        event.target !== document.getElementById("search-button") 
+      ) {
+        setSearchOpen(false);
+      }
+    };
+
+    if (searchOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [searchOpen]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -191,7 +287,7 @@ const Layout = () => {
           <Nav>
             {context.isAuthenticated ? (
               <>
-                <StyledLink to="/search">검색</StyledLink>
+                <SearchButton id="search-button" onClick={() => setSearchOpen(!searchOpen)}>검색</SearchButton>
                 {context.user.userRole === "ADMIN" && <StyledLink to="/admin">관리자 물품 관리</StyledLink>}
                 <ProfileContainer ref={dropdownRef} onClick={() => setDropdownOpen(!dropdownOpen)}>
                   <ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" hover />
@@ -216,6 +312,16 @@ const Layout = () => {
           </Nav>
         </Header>
       </HeaderContainer>
+      <SearchContainer ref={searchRef} visible={searchOpen}>
+        <SearchInput
+          type="text"
+          placeholder="검색어 입력..."
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          onKeyUp={handleKeyPress}
+        />
+        <SearchIcon onClick={handleSearch}>🔍</SearchIcon>
+      </SearchContainer>
       <HeaderDummy />
       <Section>
         <Outlet />

@@ -108,14 +108,9 @@ const BidDetail = () => {
           <DetailItem>💰 입찰 가격: {bid.biddingPrice.toLocaleString()}원</DetailItem>
           <DetailItem>⏳ 입찰 상태: {bid.biddingStatus}</DetailItem>
           <DetailItem>🏷 브랜드: {bid.searchAuctionItemRes.brand}</DetailItem>
-          <DetailItem>💵 경매
-            시작가: {bid.searchAuctionItemRes.startPrice.toLocaleString()}원</DetailItem>
-          <DetailItem>📅 경매 시작: {new Date(
-              bid.searchAuctionItemRes.startTime).toLocaleString(
-              "ko-KR")}</DetailItem>
-          <DetailItem>📅 경매 종료: {new Date(
-              bid.searchAuctionItemRes.endTime).toLocaleString(
-              "ko-KR")}</DetailItem>
+          <DetailItem>💵 경매 시작가: {bid.searchAuctionItemRes.startPrice.toLocaleString()}원</DetailItem>
+          <DetailItem>📅 경매 시작: {new Date(bid.searchAuctionItemRes.startTime).toLocaleString("ko-KR")}</DetailItem>
+          <DetailItem>📅 경매 종료: {new Date(bid.searchAuctionItemRes.endTime).toLocaleString("ko-KR")}</DetailItem>
           <DetailItem>🔍 경매 상태: {bid.searchAuctionItemRes.status}</DetailItem>
         </Info>
         <ButtonWrapper>
