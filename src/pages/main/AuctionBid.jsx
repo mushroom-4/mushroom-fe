@@ -6,6 +6,7 @@ import { Client } from "@stomp/stompjs";
 import { fetchAuctionItemDetail, placeBid } from "../../api/auctionItem";
 import { getToken, isAuthenticated } from "../../utils/auth";
 import { API_BASE_URL } from "../../config";
+import { IMAGE_BASE_URL } from "../../config";
 import defaultProfileImage from "../../assets/default-profile.png";
 import { useAuth } from "../../context/AuthContext";
 
@@ -189,6 +190,7 @@ const AuctionBid = () => {
   const [message, setMessage] = useState("");
   const [stompClient, setStompClient] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFirst, setIsFirst] = useState(true);
   const [selectedBid, setSelectedBid] = useState(0);
   const lastSendTime = useRef(0);
   const scrollRef = useRef(null);
@@ -198,6 +200,7 @@ const AuctionBid = () => {
     const loadAuctionItemDetail = async () => {
       setLoading(true);
       const response = await fetchAuctionItemDetail(auctionItemId);
+      console.log(response);
       if (response.success) {
         setItem(response.data);
         setHighestBid(response.data.bid ? response.data.bid.maxPrice : response.data.startPrice);
@@ -221,10 +224,21 @@ const AuctionBid = () => {
 
         client.subscribe(`/ws/sub/chats/${auctionItemId}`, (message) => {
           const receivedMessage = JSON.parse(message.body);
-          setChatMessages((prev) => [...prev, receivedMessage]);
-          // if (receivedMessage.messageType !== "MESSAGE") {
-          //   setHighestBid(receivedMessage.bidAmount);
-          // }
+          console.log(receivedMessage);
+          if (Array.isArray(receivedMessage)) {
+            if (isFirst) {
+              setIsFirst(false);
+              setChatMessages((prev) => [...prev, ...receivedMessage]);
+            }
+          } else {
+            setChatMessages((prev) => [...prev, receivedMessage]);
+          }
+          if (receivedMessage.messageType !== "MESSAGE") {
+            const bidAmountMatch = receivedMessage.message.match(/(\d+)(?=원에 입찰하였습니다\.)/);
+            if (bidAmountMatch) {
+              setHighestBid(Number(bidAmountMatch[1]));
+            }
+          }
           setTimeout(() => {
             if (scrollRef.current) {
               scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -247,7 +261,7 @@ const AuctionBid = () => {
       }
       setStompClient(null); // ✅ 연결 해제 시 상태 초기화
     };
-  }, [isLogin, item, auctionItemId]);
+  }, [isLogin, item, auctionItemId, isFirst]);
 
   const sendMessage = () => {
     if (!message.trim()) return;
@@ -273,10 +287,7 @@ const AuctionBid = () => {
     } catch (error) {
       console.error("🚨 메시지 전송 오류:", error);
       alert("입찰 내역이 없으셔서 채팅을 하실 수 없습니다.");
-    }
-    
-
-    
+    }    
   };
 
   const handleBidClick = (increment) => {
@@ -312,15 +323,15 @@ const AuctionBid = () => {
       return (
         <ChatMessage key={index} isMe={isMe}>
           {/* 프로필 이미지 */}
-          {!isMe && <ProfileImage src={msg.imageUrl || defaultProfileImage} alt="profile" />}
+          {!isMe && <ProfileImage src={msg.imageUrl ? (msg.imageUrl.startsWith("http") ? msg.imageUrl : `${IMAGE_BASE_URL}${msg.imageUrl}`): defaultProfileImage} alt="profile" />}
               <div>
                 <MessageInfo isMe={isMe}>
-                  {msg.nickname} · {new Date(msg.dateTime).toLocaleTimeString()}
+                  {msg.nickname} · {new Date(msg.sendDateTime).toLocaleTimeString()}
                 </MessageInfo>
                 <Bubble isMe={isMe} isBid={isBid}>{msg.message}</Bubble>
               </div>
               {/* 본인 메시지는 오른쪽 정렬 */}
-              {isMe && <ProfileImage src={msg.imageUrl || defaultProfileImage} alt="profile" />}
+              {isMe && <ProfileImage src={msg.imageUrl ? (msg.imageUrl.startsWith("http") ? msg.imageUrl : `${IMAGE_BASE_URL}${msg.imageUrl}`): defaultProfileImage} alt="profile" />}
             </ChatMessage>
             );
           })}
