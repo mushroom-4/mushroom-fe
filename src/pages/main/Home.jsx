@@ -124,8 +124,10 @@ const Home = () => {
   useEffect(() => {
     const loadAuctionItems = async () => {
       const response = await fetchAuctionItems(currentPage);
-      setAuctionItems(response.data.content);
-      setTotalPages(response.data.page.totalPages);
+      if (response.success) {
+        setAuctionItems(response.data.content);
+        setTotalPages(response.data.page.totalPages);
+      }
     };
 
     loadAuctionItems();
