@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import mainLogo from "../assets/mainLogo.png";
 import backgroundImage from "../assets/background.png";
 import defaultProfile from "../assets/default-profile.png"; // 기본 프로필 이미지
+import searchIcon from "../assets/icon-search.svg";
 
 
 
@@ -66,15 +67,19 @@ const Nav = styled.nav`
   gap: 30px;
 `;
 
-const SearchButton = styled.button`
-  font-size: 18px;
+const SearchImg = styled.img`
   background: none;
   border: none;
   cursor: pointer;
-  color: black;
+  margin-left: 1rem;
+
+  width: 25px;
+  height: 25px;
+  filter: invert(30%);
+  -webkit-user-drag: none;
 
   &:hover {
-    color: ${(props) => props.theme.colors.gray};
+    opacity: 0.7;
   }
 `;
 
@@ -104,19 +109,6 @@ const SearchInput = styled.input`
   font-size: 16px;
   border-radius: 10px;
   background: ${(props) => props.theme.colors.lightGray};
-`;
-
-const SearchIcon = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-left: 10px;
-  font-size: 18px;
-  color: ${(props) => props.theme.colors.darkGray};
-
-  &:hover {
-    color: ${(props) => props.theme.colors.gray};
-  }
 `;
 
 const Section = styled.section`
@@ -287,7 +279,7 @@ const Layout = () => {
           <Nav>
             {context.isAuthenticated ? (
               <>
-                <SearchButton id="search-button" onClick={() => setSearchOpen(!searchOpen)}>검색</SearchButton>
+                <SearchImg onClick={() => setSearchOpen(!searchOpen)} id="search-button" src={searchIcon} alt="검색" />
                 {context.user.userRole === "ADMIN" && <StyledLink to="/admin">관리자 물품 관리</StyledLink>}
                 <ProfileContainer ref={dropdownRef} onClick={() => setDropdownOpen(!dropdownOpen)}>
                   <ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" hover />
@@ -320,7 +312,7 @@ const Layout = () => {
           onChange={(e) => setKeyword(e.target.value)}
           onKeyUp={handleKeyPress}
         />
-        <SearchIcon onClick={handleSearch}>🔍</SearchIcon>
+        <SearchImg onClick={handleSearch} src={searchIcon} alt="검색" />
       </SearchContainer>
       <HeaderDummy />
       <Section>

@@ -7,6 +7,7 @@ export const API_ENDPOINTS = {
   },
   AUCTION: {
     LIST: `/v1/auction-items`,
+    SEARCH: `/v1/auction-items/search`,
     CONTROL: (id) => `/v1/auction-items/${id}`,
     DETAIL: (id) => `/v1/auction-items/${id}/info`,
     BID: (id) => `/v1/auction-items/${id}/bids`,

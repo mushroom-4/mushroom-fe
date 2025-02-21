@@ -2,8 +2,16 @@ import { request } from "./apiClient";
 import { API_ENDPOINTS } from "./apiEndpoints";
 
 /** ✅ 경매 물품 목록 조회 */
-export const fetchAuctionItems = (page = 1) => {
-  return request(`${API_ENDPOINTS.AUCTION.LIST}?page=${page}`, "GET", null, false, false);
+export const fetchAuctionItems = (params = {}) => {
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/; // YYYY-MM-DD 형식 검증
+  if (params.startDate && dateRegex.test(params.startDate)) {
+    params.startDate = `${params.startDate}T00:00:00`;
+  }
+  if (params.endDate && dateRegex.test(params.endDate)) {
+    params.endDate = `${params.endDate}T23:59:59`;
+  }
+  const queryString = new URLSearchParams(params).toString();
+  return request(`${API_ENDPOINTS.AUCTION.SEARCH}?${queryString}`, "GET", null, false, false);
 };
 
 /** ✅ 경매 물품 상세 조회 */
