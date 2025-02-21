@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { fetchAuctionItemDetail, likeAuctionItems, placeBid } from "../../api/auctionItem";
+import { fetchAuctionItemDetail, likeAuctionItems } from "../../api/auctionItem";
 import defaultImage from "../../assets/background.png";
 import {IMAGE_BASE_URL} from "../../config";
 import { isAuthenticated } from "../../utils/auth";
@@ -81,68 +81,6 @@ const LikeButton = styled.button`
   }
 `;
 
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 400px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-`;
-
-const ModalTitle = styled.h3`
-  margin-bottom: 10px;
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-`;
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-`;
-
-const CancelButton = styled.button`
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: white;
-  color: black;
-  border: 1px solid ${(props) => props.theme.colors.gray};
-  cursor: pointer;
-`;
-
-const ConfirmButton = styled.button`
-  padding: 8px 16px;
-  border-radius: 8px;
-  background: ${(props) => props.theme.colors.darkGray};
-  color: white;
-  border: none;
-  cursor: pointer;
-
-  &:hover {
-    background: ${(props) => props.theme.colors.gray};
-  }
-`;
-
 const TimerText = styled.p`
   font-size: 18px;
   font-weight: bold;
@@ -154,11 +92,9 @@ const TimerText = styled.p`
 const AuctionItemDetail = () => {
   const navigate = useNavigate();
   const isLogin = isAuthenticated();
-  const { auctionItemId } = useParams(); // URL에서 auctionItemId 가져오기
+  const { auctionItemId } = useParams();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [biddingPrice, setBiddingPrice] = useState("");
   const [timeLeft, setTimeLeft] = useState("");
   const [isBiddingActive, setIsBiddingActive] = useState(false);
 
@@ -208,31 +144,6 @@ const AuctionItemDetail = () => {
 
   if (loading) return <Loading>로딩 중...</Loading>;
 
-  const handleOpenModal = () => {
-    setBiddingPrice(""); // 초기화
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleBidSubmit = async () => {
-    if (!biddingPrice || isNaN(biddingPrice) || Number(biddingPrice) <= 0 || biddingPrice % 500 !== 0) {
-      alert("올바른 입찰가를 입력해주세요.");
-      return;
-    }
-
-    const response = await placeBid(auctionItemId, Number(biddingPrice));
-    if (response.success) {
-      setIsModalOpen(false);
-      alert("입찰에 성공했습니다.");
-    } else {
-      setIsModalOpen(false);
-      alert(response.message);
-    }
-  };
-
   const handleLike = async () => {
     const response = await likeAuctionItems(auctionItemId);
     if (response.success) {
@@ -255,6 +166,15 @@ const AuctionItemDetail = () => {
         <DetailItem>⏳ 시작 시간: {new Date(item.startTime).toLocaleString("ko-KR")}</DetailItem>
         <DetailItem>⏳ 종료 시간: {new Date(item.endTime).toLocaleString("ko-KR")}</DetailItem>
         <DetailItem>🔍 상태: {item.status}</DetailItem>
+        {
+          item.bid && 
+          <>
+            <strong>
+            <DetailItem>😎 최고 입찰자: {item.bid.bidderNickname}</DetailItem>
+            <DetailItem>💰 최고 금액: {item.bid.maxPrice.toLocaleString()}원</DetailItem>
+            </strong>
+          </>
+        }
       </Info>
       {isLogin ? (
         <>
@@ -265,7 +185,7 @@ const AuctionItemDetail = () => {
         ) : (
           <TimerText>{timeLeft}</TimerText>
         )}
-        <BidButton onClick={handleOpenModal} disabled={!isBiddingActive}>
+        <BidButton onClick={() => navigate(`/auction/${auctionItemId}/bid`)} disabled={!isBiddingActive}>
           입찰하러 가기
         </BidButton>
         </>
@@ -277,24 +197,6 @@ const AuctionItemDetail = () => {
         </BidButton>
         </>
       )}
-      {isModalOpen && (
-      <ModalOverlay>
-        <ModalContent>
-          <ModalTitle>입찰하기</ModalTitle>
-          <Input
-            type="text"
-            placeholder="입찰 금액 입력"
-            value={biddingPrice}
-            onChange={(e) => setBiddingPrice(e.target.value)}
-          />
-          <DetailItem>판매자가 설정한 경매 단위: 500원</DetailItem>
-          <ButtonGroup>
-            <CancelButton onClick={handleCloseModal}>취소</CancelButton>
-            <ConfirmButton onClick={handleBidSubmit}>입찰</ConfirmButton>
-          </ButtonGroup>
-        </ModalContent>
-      </ModalOverlay>
-    )}
   </Container>
   );
 };

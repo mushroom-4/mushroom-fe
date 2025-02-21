@@ -17,6 +17,7 @@ import Search from './pages/main/Search';
 import Wishlist from './pages/bid_history/Wishlist';
 import Notices from './pages/bid_history/Notices';
 import Admin from './pages/auth/Admin';
+import AuctionBid from './pages/main/AuctionBid';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="auction/:auctionItemId" element={<AuctionItemDetail />} />
             <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>}/>
             <Route path="registrations" element={<ProtectedRoute><AuctionRegistrationList /></ProtectedRoute>} />
+            <Route path="auction/:auctionItemId/bid" element={<ProtectedRoute><AuctionBid /></ProtectedRoute>} />
             <Route path="auction/:auctionItemId/edit" element={<ProtectedRoute><AuctionItemEdit /></ProtectedRoute>} />
             <Route path="auction/create" element={<ProtectedRoute><AuctionItemCreate /></ProtectedRoute>} />
             <Route path="bids" element={<ProtectedRoute><BidHistory /></ProtectedRoute>} />
