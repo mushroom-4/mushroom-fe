@@ -6,6 +6,32 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {IMAGE_BASE_URL} from "../../config";
 import filterIcon from "../../assets/icon-filter.svg";
 
+const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px; /* 적당한 높이 지정 */
+  
+  &::after {
+    content: "";
+    width: 40px;
+    height: 40px;
+    border: 5px solid ${(props) => props.theme.colors.gray};
+    border-top-color: ${(props) => props.theme.colors.darkGray};
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 const Container = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -182,27 +208,21 @@ const Timestamp = styled.p`
 const Pagination = styled.div`
   display: flex;
   justify-content: center;
-  gap: 8px;
-  padding: 20px;
+  margin-top: 20px;
+  gap: 10px;
 `;
 
 const PageButton = styled.button`
-  width: 36px;
-  height: 36px;
+  padding: 8px 12px;
   border: none;
-  border-radius: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
   cursor: pointer;
-  background-color: ${(props) => (props.active ? props.theme.colors.darkGray : "white")};
-  color: ${(props) => (props.active ? "white" : props.theme.colors.darkGray)};
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: ${(props) => props.theme.colors.darkGray};
+  color: white;
+  border-radius: 5px;
 
-  &:hover {
-    background-color: ${(props) => props.theme.colors.gray};
-    color: white;
+  &:disabled {
+    background: #bbb;
+    cursor: not-allowed;
   }
 `;
 
@@ -222,6 +242,8 @@ const Home = () => {
     page: searchParams.get("page") || "1",
   });
   const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+
 
   const toggleFilter = () => setIsFilterVisible((prev) => !prev);
 
@@ -237,11 +259,13 @@ const Home = () => {
 
   useEffect(() => {
     const fetchItems = async () => {
+      setLoading(true);
       const response = await fetchAuctionItems(Object.fromEntries(searchParams));
       if (response.success) {
         setAuctionItems(response.data.content);
         setTotalPages(response.data.page.totalPages);
       }
+      setLoading(false);
     };
     fetchItems();
   }, [searchParams]);
@@ -282,6 +306,9 @@ const Home = () => {
   };
 
   return (
+    loading ? (
+      <LoadingSpinner />
+    ) : (
     <>
     {/* 필터 열기 버튼 */}
     <FilterToggleButton onClick={toggleFilter}>
@@ -395,18 +422,22 @@ const Home = () => {
 
       {/* 페이지네이션 */}
       <Pagination>
-        {[...Array(totalPages)].map((_, index) => (
-          <PageButton
-            key={index + 1}
-            onClick={() => handlePageChange(index + 1)}  // ✅ 페이지 변경 함수 호출
-            active={index + 1 === parseInt(searchParams.get("page") || "1", 10)}
-          >
-            {index + 1}
-          </PageButton>
-        ))}
-      </Pagination>
+      <PageButton
+        disabled={parseInt(filters.page, 10) === 1}
+        onClick={() => handlePageChange(parseInt(filters.page, 10) - 1)}
+      >
+        이전
+      </PageButton>
+      <span>{filters.page} / {totalPages}</span>
+      <PageButton
+        disabled={parseInt(filters.page, 10) >= totalPages}
+        onClick={() => handlePageChange(parseInt(filters.page, 10) + 1)}
+      >
+        다음
+      </PageButton>
+    </Pagination>
     </>
-  );
+  ));
 };
 
 export default Home;
