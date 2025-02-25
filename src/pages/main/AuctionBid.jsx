@@ -9,6 +9,7 @@ import { API_BASE_URL } from "../../config";
 import { useAuth } from "../../context/AuthContext";
 import BackButton from "../../components/common/BackButton";
 import { getProfileImageSrc } from "../../utils/image";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 /** ✅ 전체 컨테이너 */
 const Container = styled.div`
@@ -450,7 +451,7 @@ const AuctionBid = () => {
     }
   };
 
-  if (loading) return <p>로딩 중...</p>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <>

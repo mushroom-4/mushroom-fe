@@ -6,6 +6,7 @@ import defaultImage from "../../assets/background.png";
 import {IMAGE_BASE_URL} from "../../config";
 import { isAuthenticated } from "../../utils/auth";
 import BackButton from "../../components/common/BackButton";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const Container = styled.div`
   max-width: 800px;
@@ -45,11 +46,6 @@ const Description = styled.p`
 const DetailItem = styled.p`
   font-size: 14px;
   margin: 5px 0;
-`;
-
-const Loading = styled.p`
-  font-size: 16px;
-  color: ${(props) => props.theme.colors.darkGray};
 `;
 
 const BidButton = styled.button`
@@ -143,8 +139,6 @@ const AuctionItemDetail = () => {
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   };
 
-  if (loading) return <Loading>로딩 중...</Loading>;
-
   const handleLike = async () => {
     const response = await likeAuctionItems(auctionItemId);
     if (response.success) {
@@ -153,6 +147,8 @@ const AuctionItemDetail = () => {
       alert(response.message);
     }
   }
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <>

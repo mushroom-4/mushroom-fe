@@ -6,6 +6,7 @@ import defaultImage from "../../assets/background.png";
 import { IMAGE_BASE_URL } from "../../config";
 import PaymentModal from "../../components/PaymentModal";
 import BackButton from "../../components/common/BackButton";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const Container = styled.div`
   max-width: 650px;
@@ -122,7 +123,7 @@ const BidDetail = () => {
     loadBidDetail();
   }, [bidId]);
 
-  if (loading) return <p style={{ textAlign: "center", fontSize: "16px" }}>로딩 중...</p>;
+  if (loading) return <LoadingSpinner />;
   if (!bid) return <p style={{ textAlign: "center", fontSize: "16px" }}>데이터를 불러올 수 없습니다.</p>;
 
   return (

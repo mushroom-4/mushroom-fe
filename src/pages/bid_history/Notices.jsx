@@ -62,12 +62,12 @@ const Notices = () => {
     loadNotices();
   }, []);
 
+  if (loading) return <LoadingSpinner />;
+
   return (
     <NoticeContainer>
       <Title>📭 공지사항</Title>
-      {loading ? (
-        <LoadingSpinner />
-      ) : notices.length === 0 ? (
+      {notices.length === 0 ? (
         <NoNoticeMessage>공지가 없습니다.</NoNoticeMessage>
       ) : (
         <NoticeList>

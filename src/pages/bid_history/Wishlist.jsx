@@ -4,6 +4,7 @@ import { allLikeAuctionItems } from "../../api/auctionItem";
 import defaultImage from "../../assets/background.png";
 import { useNavigate } from "react-router-dom";
 import {IMAGE_BASE_URL} from "../../config";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const Container = styled.div`
   display: flex;
@@ -114,21 +115,34 @@ const PageButton = styled.button`
   }
 `;
 
+const NoWishListMessage = styled.p`
+  text-align: center;
+  color: ${(props) => props.theme.colors.darkGray};
+  font-size: 16px;
+`;
+
 const Wishlist = () => {
   const navigate = useNavigate();
   const [auctionItems, setAuctionItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadAuctionItems = async () => {
       const response = await allLikeAuctionItems(currentPage);
-      setAuctionItems(response.data.content);
-      setTotalPages(response.data.page.totalPages);
+      if (response.success) {
+        setAuctionItems(response.data.content);
+        setTotalPages(response.data.page.totalPages);
+      }
+      setLoading(false);
     };
 
     loadAuctionItems();
   }, [currentPage]);
+
+  if (loading) return <LoadingSpinner />;
+  if (auctionItems.length === 0) return <NoWishListMessage>좋아요를 누른 경매 물품이 없습니다.</NoWishListMessage>;
 
   return (
     <>

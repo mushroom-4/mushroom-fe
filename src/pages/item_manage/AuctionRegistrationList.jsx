@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { fetchRegisteredAuctionItems } from "../../api/auctionRegistration";
 import defaultImage from "../../assets/background.png";
 import {IMAGE_BASE_URL} from "../../config";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const Container = styled.div`
   padding: 20px;
@@ -71,9 +72,16 @@ const FloatingButton = styled.button`
   }
 `;
 
+const NoItemMessage = styled.p`
+  text-align: center;
+  color: ${(props) => props.theme.colors.darkGray};
+  font-size: 16px;
+`;
+
 const AuctionRegistrationList = () => {
   const navigate = useNavigate();
   const [auctionItems, setAuctionItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadAuctionItems = async () => {
@@ -81,25 +89,31 @@ const AuctionRegistrationList = () => {
       if (response.success) {
         setAuctionItems(response.data.content);
       }
+      setLoading(false);
     };
 
     loadAuctionItems();
   }, []);
 
+  if (loading) return <LoadingSpinner />;
+
   return (
     <Container>
-      <h2>등록된 경매 물품</h2>
-      <List>
-        {auctionItems.map((item) => (
-          <Card key={item.auctionItemId} onClick={() => navigate(`/auction/${item.auctionItemId}/edit`)}>
-            <Image src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage} alt={item.name} />
-            <Content>
-              <Title>{item.brand} - {item.name}</Title>
-              <Status>상태: {item.auctionItemStatus}</Status>
-            </Content>
-          </Card>
-        ))}
-      </List>
+      {auctionItems.length === 0 ? <NoItemMessage>등록한 경매물품이 없습니다.</NoItemMessage>
+      : <>
+        <h2>등록된 경매 물품</h2>
+        <List>
+          {auctionItems.map((item) => (
+            <Card key={item.auctionItemId} onClick={() => navigate(`/auction/${item.auctionItemId}/edit`)}>
+              <Image src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage} alt={item.name} />
+              <Content>
+                <Title>{item.brand} - {item.name}</Title>
+                <Status>상태: {item.auctionItemStatus}</Status>
+              </Content>
+            </Card>
+          ))}
+        </List>
+      </>}
       <FloatingButton onClick={() => navigate("/auction/create")}>경매 등록하기</FloatingButton>
     </Container>
   );

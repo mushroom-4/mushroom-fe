@@ -286,11 +286,10 @@ const Home = () => {
     });
     setSearchParams(new URLSearchParams());
   };
-
+  
+  if (loading) return <LoadingSpinner />;
+  
   return (
-    loading ? (
-      <LoadingSpinner />
-    ) : (
     <>
     {/* 필터 열기 버튼 */}
     <FilterToggleButton onClick={toggleFilter}>
@@ -419,7 +418,7 @@ const Home = () => {
       </PageButton>
     </Pagination>
     </>
-  ));
+  );
 };
 
 export default Home;

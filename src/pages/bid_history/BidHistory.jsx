@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { fetchBidHistory } from "../../api/bid";
 import defaultImage from "../../assets/background.png";
 import {IMAGE_BASE_URL} from "../../config";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const Container = styled.div`
   max-width: 800px;
@@ -111,11 +112,18 @@ const PageButton = styled.button`
   }
 `;
 
+const NoBidMessage = styled.p`
+  text-align: center;
+  color: ${(props) => props.theme.colors.darkGray};
+  font-size: 16px;
+`;
+
 const BidHistory = () => {
   const navigate = useNavigate();
   const [bids, setBids] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadBidHistory = async () => {
@@ -124,15 +132,19 @@ const BidHistory = () => {
         setBids(response.data.content);
         setTotalPages(response.data.page.totalPages);
       }
+      setLoading(false);
     };
 
     loadBidHistory();
   }, [currentPage]);
 
+  if (loading) return <LoadingSpinner />;
+
   return (
     <Container>
       <Title>입찰 내역</Title>
       <List>
+        bids.length === 0 ? (<NoBidMessage>입찰 내역이 없습니다.</NoBidMessage>) :(
         {bids.map((bid) => (
           <Card key={bid.bidId} onClick={() => navigate(`/bids/${bid.bidId}`)} status={bid.biddingStatus} >
             <ImageWrapper>
@@ -144,7 +156,7 @@ const BidHistory = () => {
               <BidInfo>상태: {bid.biddingStatus}</BidInfo>
             </Info>
           </Card>
-        ))}
+        ))})
       </List>
 
       <Pagination>
