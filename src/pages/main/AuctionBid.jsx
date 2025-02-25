@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
@@ -15,6 +15,7 @@ const Container = styled.div`
   display: flex;
   gap: 20px;
   padding: 40px;
+  margin: 40px auto;
 
   @media (max-width: 800px) {
     flex-direction: column;
@@ -40,8 +41,8 @@ const ChatSection = styled.div`
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 12px;
-  min-height: 600px;
-  max-height: 600px;
+  min-height: calc(80vh - 200px);
+  max-height: calc(80vh - 200px);
   overflow-y: auto;
   background: #f9f9f9;
   transition: overflow-y 0.3s ease-in-out;
@@ -211,6 +212,41 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
 `;
 
+const HighestBidderContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  background: white;
+  padding: 40px 20px;
+  border-radius: 10px;
+  margin-top: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  & > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+`;
+
+const HighestBidderText = styled.span`
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+`;
+
+const TimerText = styled.p`
+  font-size: 24px;
+  font-weight: bold;
+  color: ${({ timeLeft }) => {
+    if (timeLeft < 10) return "#ff0000"; // 10초 미만: 빨간색
+    if (timeLeft < 60) return "#ff6600"; // 1분 미만: 주황색
+    if (timeLeft < 300) return "#ffaa00"; // 5분 미만: 노란색
+    return "#11dd00";
+  }};
+  transition: color 0.5s ease-in-out;
+`;
+
 const getBidIncrements = (price) => {
   
   if (price < 100000) return [100, 500, 1000, 5000];
@@ -222,9 +258,11 @@ const getBidIncrements = (price) => {
 const AuctionBid = () => {
   const { auctionItemId } = useParams();
   const isLogin = isAuthenticated();
+  const navigate = useNavigate();
   const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [highestBid, setHighestBid] = useState(0);
+  const [highestBidder, setHighestBidder] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [stompClient, setStompClient] = useState(null);
@@ -234,6 +272,41 @@ const AuctionBid = () => {
   const scrollRef = useRef(null);
   const context = useAuth();
   const bidIncrements = getBidIncrements(highestBid);
+  const [timeLeft, setTimeLeft] = useState("");
+  
+  useEffect(() => {
+    if (!item) {
+      return;
+    }
+
+    if (!item || new Date(item.endTime).getTime() < new Date().getTime()) {
+      alert("이 경매는 이미 종료되었습니다.");
+      navigate(-1); // 자동으로 이전 페이지로 이동
+      return;
+    }
+
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const end = new Date(item.endTime).getTime();
+      const diff = end - now;
+  
+      if (diff <= 0) {
+        navigate(-1); // ⏳ 시간이 지나면 자동으로 이전 페이지로 이동
+        return;
+      }
+  
+      const hours = String(Math.floor(diff / (1000 * 60 * 60))).padStart(2, "0");
+      const minutes = String(Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, "0");
+      const seconds = String(Math.floor((diff % (1000 * 60)) / 1000)).padStart(2, "0");
+  
+      setTimeLeft(`${hours}:${minutes}:${seconds}`);
+    };
+  
+    calculateTimeLeft(); // 초기 실행
+    const timer = setInterval(calculateTimeLeft, 1000); // 1초마다 업데이트
+  
+    return () => clearInterval(timer);
+  }, [item, navigate]);
   
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
@@ -241,8 +314,11 @@ const AuctionBid = () => {
       const response1 = await fetchAuctionItemDetail(auctionItemId);
       if (response1.success) {
         setItem(response1.data);
-        console.log(response1.data);
         setHighestBid(response1.data.bid ? response1.data.bid.maxPrice : response1.data.startPrice);
+        setHighestBidder({
+          nickname: response1.data.bid.bidderNickname,
+          imageUrl: response1.data.bid.imageUrl,
+        });
       }
       const response2 = await auctionItemChat(auctionItemId);
       if (response2.success) {
@@ -284,6 +360,10 @@ const AuctionBid = () => {
             const bidAmountMatch = receivedMessage.message.match(/(\d+)(?=원에 입찰하였습니다\.)/);
             if (bidAmountMatch) {
               setHighestBid(Number(bidAmountMatch[1]));
+              setHighestBidder({
+                nickname: receivedMessage.nickname,
+                imageUrl: receivedMessage.imageUrl,
+              })
             }
           }
           setTimeout(() => {
@@ -354,6 +434,12 @@ const AuctionBid = () => {
   };
 
   const confirmBid = async () => {
+    if (highestBidder?.nickname === context.user.nickname) {
+      alert("이미 최고가 입찰자입니다.");
+      setIsModalOpen(false);
+      return;
+    }
+  
     const response = await placeBid(auctionItemId, selectedBid);
     if (response.success) {
       setIsModalOpen(false);
@@ -405,11 +491,17 @@ const AuctionBid = () => {
         </ChatInputContainer>
       </ChatContainer>
 
-
-      {/* 입찰 영역 */}
       <BiddingSection>
-        <p>현재 최고 입찰 금액</p>
-        <PriceText>{highestBid.toLocaleString()}원</PriceText>
+      <TimerText timeLeft={parseInt(timeLeft.split(":")[2]) + parseInt(timeLeft.split(":")[1]) * 60 + parseInt(timeLeft.split(":")[0]) * 60 * 60}>{timeLeft}</TimerText>
+        <HighestBidderContainer>
+          <span>현재 최고 입찰자: </span>
+          <div>
+            <ProfileImage src={getProfileImageSrc(highestBidder.imageUrl)} alt="최고 입찰자 프로필" />
+            <HighestBidderText>{highestBidder.nickname}</HighestBidderText>
+          </div>
+          <PriceText>{highestBid.toLocaleString()}원</PriceText>
+        </HighestBidderContainer>
+        <br/>
         {bidIncrements.map((increment, i) => (
           <BidButton key={increment} onClick={() => handleBidClick(increment)} disabled={!isLogin} tier={i + 1}>
             +{increment.toLocaleString()}
