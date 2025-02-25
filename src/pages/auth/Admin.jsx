@@ -6,6 +6,32 @@ import {IMAGE_BASE_URL} from "../../config";
 import { fetchAdminAuctionItems, setStatusAdminAuctionItems } from "../../api/auctionItem";
 import defaultImage from "../../assets/background.png";
 
+const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px; /* 테이블 높이에 맞춤 */
+  
+  &::after {
+    content: "";
+    width: 40px;
+    height: 40px;
+    border: 5px solid ${(props) => props.theme.colors.gray};
+    border-top-color: ${(props) => props.theme.colors.darkGray};
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
 const Container = styled.div`
   max-width: 1200px;
   margin: 40px auto;
@@ -139,7 +165,7 @@ const PageButton = styled.button`
 `;
 
 const Admin = () => {
-  const statusList = ["INSPECTING", "REJECTED", "WAITING", "PROGRESSING", "COMPLETED", "UNTRADED"];
+  const statusList = ["INSPECTING", "REJECTED", "WAITING", "PROGRESSING", "COMPLETED", "NON_TRADED"];
   const navigate = useNavigate();
   const context = useAuth();
   const [auctionItems, setAuctionItems] = useState([]);
@@ -158,6 +184,7 @@ const Admin = () => {
   }, [currentPage, statusFilter]);
 
   const fetchAuctionItems = async (page, status) => {
+    setLoading(true);
     const response = await fetchAdminAuctionItems(page, status);
     setAuctionItems(response.data.content);
     setTotalPages(response.data.page.totalPages);
@@ -201,7 +228,7 @@ const Admin = () => {
       </FilterContainer>
 
       {loading ? (
-        <p>로딩 중...</p>
+          <LoadingSpinner />
       ) : (
         <>
           <Table>

@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     DETAIL: (id) => `/api/v2/auction-items/${id}/info`,
     BID: (id) => `/api/v1/auction-items/${id}/bids`,
     PAYMENT: `/api/v2/payments/confirm/widget`,
+    CHAT: (chatRoomId) => `/api/v2/bids/chats/${chatRoomId}`,
   },
   USER: {
     REGISTRATIONS: `/api/v1/users/registrations`,

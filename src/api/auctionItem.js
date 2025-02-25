@@ -49,3 +49,8 @@ export const unlikeAuctionItems = (auctionItemId) => {
 export const allLikeAuctionItems = (page = 1) => {
   return request(`${API_ENDPOINTS.LIKE.GET_LIKE_ITEMS}?page=${page}`, "GET", null, true, false);
 };
+
+/** ✅ 채팅 조회 */
+export const auctionItemChat = (auctionItemId) => {
+  return request(`${API_ENDPOINTS.AUCTION.CHAT(auctionItemId)}`, "GET", null, true, false);
+};

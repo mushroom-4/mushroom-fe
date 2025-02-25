@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import { fetchAuctionItemDetail, placeBid } from "../../api/auctionItem";
+import { auctionItemChat, fetchAuctionItemDetail, placeBid } from "../../api/auctionItem";
 import { getToken, isAuthenticated } from "../../utils/auth";
 import { API_BASE_URL } from "../../config";
 import { IMAGE_BASE_URL } from "../../config";
@@ -190,7 +190,6 @@ const AuctionBid = () => {
   const [message, setMessage] = useState("");
   const [stompClient, setStompClient] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isFirst, setIsFirst] = useState(true);
   const [selectedBid, setSelectedBid] = useState(0);
   const lastSendTime = useRef(0);
   const scrollRef = useRef(null);
@@ -199,11 +198,16 @@ const AuctionBid = () => {
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
       setLoading(true);
-      const response = await fetchAuctionItemDetail(auctionItemId);
-      console.log(response);
-      if (response.success) {
-        setItem(response.data);
-        setHighestBid(response.data.bid ? response.data.bid.maxPrice : response.data.startPrice);
+      const response1 = await fetchAuctionItemDetail(auctionItemId);
+      if (response1.success) {
+        setItem(response1.data);
+        setHighestBid(response1.data.bid ? response1.data.bid.maxPrice : response1.data.startPrice);
+      }
+      const response2 = await auctionItemChat(auctionItemId);
+      if (response2.success) {
+        const receivedMessage = response2.data;
+        console.log(receivedMessage);
+        setChatMessages((prev) => [...prev, ...receivedMessage]);
       }
       setLoading(false);
     };
@@ -224,13 +228,7 @@ const AuctionBid = () => {
 
         client.subscribe(`/ws/sub/chats/${auctionItemId}`, (message) => {
           const receivedMessage = JSON.parse(message.body);
-          console.log(receivedMessage);
-          if (Array.isArray(receivedMessage)) {
-            if (isFirst) {
-              setIsFirst(false);
-              setChatMessages((prev) => [...prev, ...receivedMessage]);
-            }
-          } else {
+          if (!Array.isArray(receivedMessage)) {
             setChatMessages((prev) => [...prev, receivedMessage]);
           }
           if (receivedMessage.messageType !== "MESSAGE") {
@@ -261,7 +259,7 @@ const AuctionBid = () => {
       }
       setStompClient(null); // ✅ 연결 해제 시 상태 초기화
     };
-  }, [isLogin, item, auctionItemId, isFirst]);
+  }, [isLogin, item, auctionItemId]);
 
   const sendMessage = () => {
     if (!message.trim()) return;
