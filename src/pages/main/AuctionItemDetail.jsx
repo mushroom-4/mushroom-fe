@@ -5,6 +5,7 @@ import { fetchAuctionItemDetail, likeAuctionItems } from "../../api/auctionItem"
 import defaultImage from "../../assets/background.png";
 import {IMAGE_BASE_URL} from "../../config";
 import { isAuthenticated } from "../../utils/auth";
+import BackButton from "../../components/common/BackButton";
 
 const Container = styled.div`
   max-width: 800px;
@@ -154,7 +155,9 @@ const AuctionItemDetail = () => {
   }
 
   return (
-    <Container>
+    <>
+      <BackButton />
+      <Container>
       {isLogin ? <LikeButton onClick={handleLike}>관심 갖기</LikeButton>: <></>}
       <Image src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage} alt={item.name} />
       <Info>
@@ -198,6 +201,7 @@ const AuctionItemDetail = () => {
         </>
       )}
   </Container>
+    </>
   );
 };
 

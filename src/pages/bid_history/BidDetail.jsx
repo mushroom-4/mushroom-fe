@@ -5,6 +5,7 @@ import { fetchBidDetail } from "../../api/bid";
 import defaultImage from "../../assets/background.png";
 import {IMAGE_BASE_URL} from "../../config";
 import PaymentModal from "../../components/PaymentModal";
+import BackButton from "../../components/common/BackButton";
 
 
 const Container = styled.div`
@@ -94,6 +95,8 @@ const BidDetail = () => {
   if (!bid) return <Loading>데이터를 불러올 수 없습니다.</Loading>;
 
   return (
+    <>
+      <BackButton />
       <Container>
         <Title>입찰 내역 상세</Title>
         <ImageWrapper>
@@ -128,6 +131,7 @@ const BidDetail = () => {
             />
         )}
       </Container>
+      </>
   );
 };
 
