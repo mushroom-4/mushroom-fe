@@ -13,7 +13,6 @@ import BidHistory from './pages/bid_history/BidHistory';
 import BidDetail from './pages/bid_history/BidDetail';
 import PaymentSuccess from "./pages/bid_history/PaymentSuccess";
 import PaymentFail from "./pages/bid_history/PaymentFail";
-import Search from './pages/main/Search';
 import Wishlist from './pages/bid_history/Wishlist';
 import Notices from './pages/bid_history/Notices';
 import Admin from './pages/auth/Admin';
@@ -27,7 +26,6 @@ function App() {
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
-            <Route path="search" element={<Search />} />
             <Route path="admin" element={<ProtectedRoute><Admin /></ProtectedRoute>}/>
             <Route path="auction/:auctionItemId" element={<AuctionItemDetail />} />
             <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>}/>

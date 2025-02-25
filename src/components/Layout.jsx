@@ -1,13 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
-import { Outlet, Link, useNavigate } from "react-router-dom";
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import mainLogo from "../assets/mainLogo.png";
 import backgroundImage from "../assets/background.png";
 import defaultProfile from "../assets/default-profile.png"; // 기본 프로필 이미지
 import searchIcon from "../assets/icon-search.svg";
-
-
+import { fetchPopularKeywords } from "../api/auctionItem";
 
 const Container = styled.div`
   position: relative;
@@ -67,48 +66,55 @@ const Nav = styled.nav`
   gap: 30px;
 `;
 
-const SearchImg = styled.img`
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-left: 1rem;
-
-  width: 25px;
-  height: 25px;
-  filter: invert(30%);
-  -webkit-user-drag: none;
-
-  &:hover {
-    opacity: 0.7;
-  }
-`;
-
 const SearchContainer = styled.div`
   position: fixed;
-  top: 50%;
+  top: 30%;
   left: 50%;
-  width: 300px;
+  width: 320px;
   transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
   background: white;
   padding: 10px;
-  border-radius: 20px;
+  border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   opacity: ${(props) => (props.visible ? 1 : 0)};
-  transform: ${(props) => (props.visible ? "translate(-50%, -50%)" : "translate(-50%, -60%)")};
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-  z-index: ${(props) => (props.visible ? '999' : '-1')};
+  transition: opacity 0.3s ease-in-out;
+  z-index: ${(props) => (props.visible ? "999" : "-1")};
 `;
 
 const SearchInput = styled.input`
-  flex: 1;
-  border: none;
-  outline: none;
-  padding: 8px;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid ${(props) => props.theme.colors.gray};
+  border-radius: 8px;
   font-size: 16px;
-  border-radius: 10px;
+`;
+
+const PopularKeywordsContainer = styled.div`
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+`;
+
+const KeywordTag = styled.button`
   background: ${(props) => props.theme.colors.lightGray};
+  color: ${(props) => props.theme.colors.darkGray};
+  border: none;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  
+  &:hover {
+    background: ${(props) => props.theme.colors.gray};
+  }
+`;
+
+const SearchImg = styled.img`
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  margin-left: 8px;
 `;
 
 const Section = styled.section`
@@ -121,7 +127,6 @@ const StyledLink = styled(Link)`
   text-decoration: none;
   font-size: 18px;
   color: black;
-  -webkit-user-drag: none;
 
   &:hover {
     color: ${(props) => props.theme.colors.gray};
@@ -133,14 +138,12 @@ const HomeLogoLink = styled(Link)`
   font-size: 24px;
   display: flex;
   align-items: center;
-  -webkit-user-drag: none;
 `;
 
 const LogoImage = styled.img`
   width: 40px;
   height: 40px;
   border-radius: 10%;
-  -webkit-user-drag: none;
 `;
 
 const ProfileContainer = styled.div`
@@ -156,7 +159,6 @@ const ProfileImage = styled.img`
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid ${(props) => props.theme.colors.gray};
-  -webkit-user-drag: none;
   &:hover {
     opacity: ${(props) => (props.hover ? "0.5" : "1")};
   }
@@ -201,13 +203,15 @@ const LogoutButton = styled(DropdownItem)`
 
 const Layout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const context = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
+  const [popularKeywords, setPopularKeywords] = useState([]);
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
-
+  const searchInputRef = useRef(null);
 
   const handleLogout = () => {
     context.logout();
@@ -215,43 +219,51 @@ const Layout = () => {
     navigate("/");
   };
 
-  const handleSearch = () => {
-    if (keyword.trim()) {
-      const currentParams = new URLSearchParams(window.location.search);
-  
-      if (currentParams.has("keyword")) {
-        currentParams.set("keyword", encodeURIComponent(keyword));
-      } else {
-        currentParams.append("keyword", encodeURIComponent(keyword));
-      }
-  
-      navigate(`/?${currentParams.toString()}`);
+  const handleSearch = (query) => {
+    if (query.trim()) {
+      navigate(`/?keyword=${encodeURIComponent(query)}`);
       setSearchOpen(false);
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") handleSearch();
+  const handleInputChange = (e) => setKeyword(e.target.value);
+
+  const handleKeywordClick = (word) => {
+    setKeyword(word);
+    handleSearch(word);
   };
 
   useEffect(() => {
+    const getPopularKeywords = async () => {
+      const response = await fetchPopularKeywords();
+      if (response.success) {
+        setPopularKeywords(response.data);
+      }
+    }
+
     const handleClickOutside = (event) => {
       if (
-        searchRef.current && !searchRef.current.contains(event.target) && 
-        event.target !== document.getElementById("search-button") 
+        searchRef.current &&
+        !searchRef.current.contains(event.target) &&
+        event.target !== document.getElementById("search-button")
       ) {
         setSearchOpen(false);
       }
     };
-
+  
     if (searchOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      setTimeout(() => {
+        searchInputRef.current?.focus(); // ✅ 검색창이 열릴 때 자동 focus
+      }, 100);
     } else {
       document.removeEventListener("mousedown", handleClickOutside);
     }
-
+    getPopularKeywords();
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [searchOpen]);
+
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -277,9 +289,11 @@ const Layout = () => {
             <LogoImage src={mainLogo} alt="멋이룸" />
           </HomeLogoLink>
           <Nav>
+          {location.pathname === "/" && (
+              <SearchImg onClick={() => setSearchOpen(!searchOpen)} id="search-button" src={searchIcon} alt="검색" />
+            )}
             {context.isAuthenticated ? (
               <>
-                <SearchImg onClick={() => setSearchOpen(!searchOpen)} id="search-button" src={searchIcon} alt="검색" />
                 {context.user.userRole === "ADMIN" && <StyledLink to="/admin">관리자 물품 관리</StyledLink>}
                 <ProfileContainer ref={dropdownRef} onClick={() => setDropdownOpen(!dropdownOpen)}>
                   <ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" hover />
@@ -304,15 +318,28 @@ const Layout = () => {
           </Nav>
         </Header>
       </HeaderContainer>
-      <SearchContainer ref={searchRef} visible={searchOpen}>
-        <SearchInput
-          type="text"
-          placeholder="검색어 입력..."
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onKeyUp={handleKeyPress}
-        />
-        <SearchImg onClick={handleSearch} src={searchIcon} alt="검색" />
+        <SearchContainer ref={searchRef} visible={searchOpen}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <SearchInput
+            type="text"
+            ref={searchInputRef}
+            placeholder="검색어 입력..."
+            value={keyword}
+            onChange={handleInputChange}
+            onKeyUp={(e) => e.key === "Enter" && handleSearch(keyword)}
+          />
+          <SearchImg src={searchIcon} alt="검색" onClick={() => handleSearch(keyword)} />
+        </div>
+        {/* ✅ 인기 검색어 목록 */}
+        {popularKeywords.length > 0 && (
+          <PopularKeywordsContainer>
+            {popularKeywords.map((word, index) => (
+              <KeywordTag key={index} onClick={() => handleKeywordClick(word)}>
+                {word}
+              </KeywordTag>
+            ))}
+          </PopularKeywordsContainer>
+        )}
       </SearchContainer>
       <HeaderDummy />
       <Section>

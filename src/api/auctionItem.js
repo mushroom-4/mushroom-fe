@@ -54,3 +54,8 @@ export const allLikeAuctionItems = (page = 1) => {
 export const auctionItemChat = (auctionItemId) => {
   return request(`${API_ENDPOINTS.AUCTION.CHAT(auctionItemId)}`, "GET", null, true, false);
 };
+
+// ✅ 인기 검색어 API 요청 함수
+export const fetchPopularKeywords = async () => {
+  return request(API_ENDPOINTS.AUCTION.POPULAR, "GET", null, false, false);
+};

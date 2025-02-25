@@ -260,7 +260,11 @@ const Home = () => {
   useEffect(() => {
     const fetchItems = async () => {
       setLoading(true);
-      const response = await fetchAuctionItems(Object.fromEntries(searchParams));
+      const params = Object.fromEntries(searchParams);
+      if (params.keyword) {
+        params.keyword = decodeURIComponent(params.keyword);
+      }
+      const response = await fetchAuctionItems(params);
       if (response.success) {
         setAuctionItems(response.data.content);
         setTotalPages(response.data.page.totalPages);
@@ -288,6 +292,9 @@ const Home = () => {
 
   const handleSearch = () => {
     const newParams = new URLSearchParams(filters);
+    if (filters.keyword) {
+      newParams.set("keyword", encodeURIComponent(filters.keyword));
+    }
     setSearchParams(newParams);
   };
 
