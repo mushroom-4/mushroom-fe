@@ -304,6 +304,7 @@ const Layout = () => {
             )}
             {context.isAuthenticated ? (
               <>
+                {context.user.userRole === "ADMIN" && <StyledLink to="/admin">관리자 물품 관리</StyledLink>}
                 <ProfileContainer ref={dropdownRef} onClick={() => setDropdownOpen(!dropdownOpen)}>
                   <ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" hover />
                   {dropdownOpen && (
