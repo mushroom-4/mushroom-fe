@@ -9,6 +9,7 @@ import { API_BASE_URL } from "../../config";
 import { IMAGE_BASE_URL } from "../../config";
 import defaultProfileImage from "../../assets/default-profile.png";
 import { useAuth } from "../../context/AuthContext";
+import BackButton from "../../components/common/BackButton";
 
 /** ✅ 전체 컨테이너 */
 const Container = styled.div`
@@ -38,6 +39,8 @@ const ChatSection = styled.div`
   max-height: 600px;
   overflow-y: auto;
   background: #f9f9f9;
+  width: 400px;
+  transition: overflow-y 0.3s ease-in-out;
 `;
 
 /** ✅ 메시지 스타일 */
@@ -51,7 +54,7 @@ const ChatMessage = styled.div`
 
 /** ✅ 말풍선 */
 const Bubble = styled.div`
-  max-width: 75%;
+  /* object-fit: contain; */
   padding: 10px 14px;
   border-radius: 16px;
   font-size: 14px;
@@ -180,6 +183,13 @@ const ButtonGroup = styled.div`
   margin-top: 20px;
 `;
 
+const getBidIncrements = (price) => {
+  if (price < 10000) return [100, 500, 1000, 2000];
+
+  const base = Math.pow(10, Math.floor(Math.log10(price)) - 1); // 가격의 자릿수를 기반으로 증가 단위 계산
+  return [base, base * 5, base * 10, base * 20];
+};
+
 const AuctionBid = () => {
   const { auctionItemId } = useParams();
   const isLogin = isAuthenticated();
@@ -194,6 +204,8 @@ const AuctionBid = () => {
   const lastSendTime = useRef(0);
   const scrollRef = useRef(null);
   const context = useAuth();
+  const bidIncrements = getBidIncrements(highestBid);
+  
 
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
@@ -206,10 +218,17 @@ const AuctionBid = () => {
       const response2 = await auctionItemChat(auctionItemId);
       if (response2.success) {
         const receivedMessage = response2.data;
-        console.log(receivedMessage);
         setChatMessages((prev) => [...prev, ...receivedMessage]);
       }
       setLoading(false);
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
     };
 
     loadAuctionItemDetail();
@@ -239,7 +258,10 @@ const AuctionBid = () => {
           }
           setTimeout(() => {
             if (scrollRef.current) {
-              scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+              scrollRef.current.scrollTo({
+                top: scrollRef.current.scrollHeight,
+                behavior: "smooth",
+              });
             }
           }, 100);
         });
@@ -263,6 +285,10 @@ const AuctionBid = () => {
 
   const sendMessage = () => {
     if (!message.trim()) return;
+    if (message.length > 50) {
+      alert("메시지 크기가 길어요");
+      return;
+    }
     if (!isLogin) {
       alert("로그인이 필요합니다.");
       return;
@@ -311,17 +337,19 @@ const AuctionBid = () => {
   if (loading) return <p>로딩 중...</p>;
 
   return (
+    <>
+    <BackButton/>
     <Container>
       <ChatContainer>
       {/* 채팅 영역 */}
-  <ChatSection>
-    {chatMessages.map((msg, index) => {
-      const isMe = msg.nickname === context.user.nickname;
-      const isBid = msg.messageType !== "MESSAGE";
-      return (
-        <ChatMessage key={index} isMe={isMe}>
-          {/* 프로필 이미지 */}
-          {!isMe && <ProfileImage src={msg.imageUrl ? (msg.imageUrl.startsWith("http") ? msg.imageUrl : `${IMAGE_BASE_URL}${msg.imageUrl}`): defaultProfileImage} alt="profile" />}
+      <ChatSection ref={scrollRef}>
+        {chatMessages.map((msg, index) => {
+          const isMe = msg.nickname === context.user.nickname;
+          const isBid = msg.messageType !== "MESSAGE";
+          return (
+            <ChatMessage key={index} isMe={isMe}>
+              {/* 프로필 이미지 */}
+              {!isMe && <ProfileImage src={msg.imageUrl ? (msg.imageUrl.startsWith("http") ? msg.imageUrl : `${IMAGE_BASE_URL}${msg.imageUrl}`): defaultProfileImage} alt="profile" />}
               <div>
                 <MessageInfo isMe={isMe}>
                   {msg.nickname} · {new Date(msg.sendDateTime).toLocaleTimeString()}
@@ -353,9 +381,11 @@ const AuctionBid = () => {
       <BiddingSection>
         <p>현재 최고 입찰 금액</p>
         <PriceText>{highestBid.toLocaleString()}원</PriceText>
-        <BidButton onClick={() => handleBidClick(500)} disabled={!isLogin}>+500</BidButton>
-        <BidButton onClick={() => handleBidClick(1000)} disabled={!isLogin}>+1,000</BidButton>
-        <BidButton onClick={() => handleBidClick(2000)} disabled={!isLogin}>+2,000</BidButton>
+        {bidIncrements.map((increment) => (
+          <BidButton key={increment} onClick={() => handleBidClick(increment)} disabled={!isLogin}>
+            +{increment.toLocaleString()}
+          </BidButton>
+        ))}
       </BiddingSection>
 
       {/* 입찰 모달 */}
@@ -363,7 +393,7 @@ const AuctionBid = () => {
         <ModalOverlay>
           <ModalContent>
             <h3>입찰 금액을 확인해 주세요</h3>
-            <p>입찰 취소 시 불이익이 있을 수 있습니다.</p>
+            <p>낙찰 이후에 취소하면 불이익이 있을 수 있습니다.</p>
             <PriceText>{selectedBid.toLocaleString()}원</PriceText>
             <ButtonGroup>
               <button onClick={() => setIsModalOpen(false)}>취소</button>
@@ -373,6 +403,7 @@ const AuctionBid = () => {
         </ModalOverlay>
       )}
     </Container>
+    </>
   );
 };
 

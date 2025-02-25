@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 const Button = styled.div`
   position: absolute;
-  top: -1rem;
+  top: -1.5rem;
   left: 2.5rem;
   display: block;
   padding: 0;
