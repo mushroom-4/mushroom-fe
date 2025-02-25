@@ -6,25 +6,30 @@ import { Client } from "@stomp/stompjs";
 import { auctionItemChat, fetchAuctionItemDetail, placeBid } from "../../api/auctionItem";
 import { getToken, isAuthenticated } from "../../utils/auth";
 import { API_BASE_URL } from "../../config";
-import { IMAGE_BASE_URL } from "../../config";
-import defaultProfileImage from "../../assets/default-profile.png";
 import { useAuth } from "../../context/AuthContext";
 import BackButton from "../../components/common/BackButton";
+import { getProfileImageSrc } from "../../utils/image";
 
 /** ✅ 전체 컨테이너 */
 const Container = styled.div`
   display: flex;
   gap: 20px;
-  max-width: 1000px;
-  margin: 40px auto;
+  padding: 40px;
+
+  @media (max-width: 800px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 
 const ChatContainer = styled.div`
   display: flex;
   flex-direction: column;
-  max-width: 800px;
-  min-width: 400px;
+  width: 50%;
+  @media (max-width: 800px) {
+    width: 100%;
+  }
 `;
 
 /** ✅ 채팅 섹션 (스크롤 가능) */
@@ -39,17 +44,29 @@ const ChatSection = styled.div`
   max-height: 600px;
   overflow-y: auto;
   background: #f9f9f9;
-  width: 400px;
   transition: overflow-y 0.3s ease-in-out;
 `;
 
-/** ✅ 메시지 스타일 */
 const ChatMessage = styled.div`
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
+  flex-direction: column;
   margin-bottom: 12px;
-  ${({ isMe }) => isMe && `flex-direction: row-reverse;`} /* 본인 메시지 오른쪽 정렬 */
+`;
+
+const ChatMessageBottom = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  ${({ isMe }) => isMe && `flex-direction: row-reverse;`}
+`;
+
+const MessageInfo = styled.div`
+  display: flex;
+  font-size: 12px;
+  padding: 6px;
+  color: ${(props) => props.theme.colors.gray};
+  gap: 4px;
+  ${({ isMe }) => isMe && `flex-direction: row-reverse;`}
 `;
 
 /** ✅ 말풍선 */
@@ -73,13 +90,6 @@ const ProfileImage = styled.img`
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid #ccc;
-`;
-
-/** ✅ 메시지 정보 (닉네임 & 시간) */
-const MessageInfo = styled.div`
-  font-size: 12px;
-  color: #777;
-  ${({ isMe }) => isMe && `text-align: right;`}
 `;
 
 /** ✅ 채팅 입력창 */
@@ -127,6 +137,10 @@ const BiddingSection = styled.div`
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 20px;
+  width: 50%;
+  @media (max-width: 800px) {
+    width: 100%;
+  }
 `;
 
 const PriceText = styled.p`
@@ -136,17 +150,31 @@ const PriceText = styled.p`
 
 const BidButton = styled.button`
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   margin: 5px 0;
   border-radius: 5px;
   border: none;
   cursor: pointer;
-  background-color: ${(props) => props.theme.colors.darkGray};
-  color: white;
-  transition: background 0.2s ease-in-out;
+  font-weight: bold;
+  transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
   
+  ${({ tier, theme }) => {
+    switch (tier) {
+      case 1:
+        return `background-color: ${theme.colors.lightGray}; color: black;`;
+      case 2:
+        return `background-color: ${theme.colors.gray}; color: black;`;
+      case 3:
+        return `background-color: ${theme.colors.darkGray}; color: white;`;  // 주황색 강조
+      case 4:
+        return `background-color: #b72222; color: white;`;  // 빨간색 강조
+      default:
+        return `background-color: ${theme.colors.darkGray}; color: white;`;
+    }
+  }}
+
   &:hover {
-    background-color: ${(props) => props.theme.colors.gray};
+    transform: scale(1.05);
   }
   
   &:disabled {
@@ -184,10 +212,11 @@ const ButtonGroup = styled.div`
 `;
 
 const getBidIncrements = (price) => {
-  if (price < 10000) return [100, 500, 1000, 2000];
+  
+  if (price < 100000) return [100, 500, 1000, 5000];
 
-  const base = Math.pow(10, Math.floor(Math.log10(price)) - 1); // 가격의 자릿수를 기반으로 증가 단위 계산
-  return [base, base * 5, base * 10, base * 20];
+  const base = Math.pow(10, Math.floor(Math.log10(price)) - 2); // 가격의 자릿수를 기반으로 증가 단위 계산
+  return [base, base * 5, base * 10, base * 50];
 };
 
 const AuctionBid = () => {
@@ -206,13 +235,13 @@ const AuctionBid = () => {
   const context = useAuth();
   const bidIncrements = getBidIncrements(highestBid);
   
-
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
       setLoading(true);
       const response1 = await fetchAuctionItemDetail(auctionItemId);
       if (response1.success) {
         setItem(response1.data);
+        console.log(response1.data);
         setHighestBid(response1.data.bid ? response1.data.bid.maxPrice : response1.data.startPrice);
       }
       const response2 = await auctionItemChat(auctionItemId);
@@ -247,6 +276,7 @@ const AuctionBid = () => {
 
         client.subscribe(`/ws/sub/chats/${auctionItemId}`, (message) => {
           const receivedMessage = JSON.parse(message.body);
+          console.log(receivedMessage);
           if (!Array.isArray(receivedMessage)) {
             setChatMessages((prev) => [...prev, receivedMessage]);
           }
@@ -286,7 +316,7 @@ const AuctionBid = () => {
   const sendMessage = () => {
     if (!message.trim()) return;
     if (message.length > 50) {
-      alert("메시지 크기가 길어요");
+      alert("메시지 크기는 50자 이내로 부탁드려요");
       return;
     }
     if (!isLogin) {
@@ -348,16 +378,15 @@ const AuctionBid = () => {
           const isBid = msg.messageType !== "MESSAGE";
           return (
             <ChatMessage key={index} isMe={isMe}>
-              {/* 프로필 이미지 */}
-              {!isMe && <ProfileImage src={msg.imageUrl ? (msg.imageUrl.startsWith("http") ? msg.imageUrl : `${IMAGE_BASE_URL}${msg.imageUrl}`): defaultProfileImage} alt="profile" />}
-              <div>
-                <MessageInfo isMe={isMe}>
-                  {msg.nickname} · {new Date(msg.sendDateTime).toLocaleTimeString()}
-                </MessageInfo>
+              <ChatMessageBottom isMe={isMe}>
+                <ProfileImage src={getProfileImageSrc(msg.imageUrl)} alt="profile" />
                 <Bubble isMe={isMe} isBid={isBid}>{msg.message}</Bubble>
-              </div>
-              {/* 본인 메시지는 오른쪽 정렬 */}
-              {isMe && <ProfileImage src={msg.imageUrl ? (msg.imageUrl.startsWith("http") ? msg.imageUrl : `${IMAGE_BASE_URL}${msg.imageUrl}`): defaultProfileImage} alt="profile" />}
+              </ChatMessageBottom>
+              <MessageInfo isMe={isMe}>
+                <span>{msg.nickname}</span>
+                <span>·</span>
+                <span>{new Date(msg.sendDateTime).toLocaleTimeString()}</span>
+              </MessageInfo>
             </ChatMessage>
             );
           })}
@@ -381,15 +410,15 @@ const AuctionBid = () => {
       <BiddingSection>
         <p>현재 최고 입찰 금액</p>
         <PriceText>{highestBid.toLocaleString()}원</PriceText>
-        {bidIncrements.map((increment) => (
-          <BidButton key={increment} onClick={() => handleBidClick(increment)} disabled={!isLogin}>
+        {bidIncrements.map((increment, i) => (
+          <BidButton key={increment} onClick={() => handleBidClick(increment)} disabled={!isLogin} tier={i + 1}>
             +{increment.toLocaleString()}
           </BidButton>
         ))}
       </BiddingSection>
-
-      {/* 입찰 모달 */}
-      {isModalOpen && (
+    </Container>
+    {/* 입찰 모달 */}
+    {isModalOpen && (
         <ModalOverlay>
           <ModalContent>
             <h3>입찰 금액을 확인해 주세요</h3>
@@ -402,7 +431,6 @@ const AuctionBid = () => {
           </ModalContent>
         </ModalOverlay>
       )}
-    </Container>
     </>
   );
 };
