@@ -11,7 +11,7 @@ export const API_ENDPOINTS = {
     CONTROL: (id) => `/api/auction-items/${id}`,
     DETAIL: (id) => `/api/auction-items/${id}/info`,
     BID: (id) => `/api/auction-items/${id}/bids`,
-    PAYMENT: `/api/payments/confirm/widget`,
+    PAYMENT: `/api/payments/confirm`,
     CHAT: (chatRoomId) => `/api/bids/chats/${chatRoomId}`,
     POPULAR: `/api/auction-items/popular-keywords`,
     NOTICE: `/api/users/notices`,

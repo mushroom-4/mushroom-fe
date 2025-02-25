@@ -29,13 +29,25 @@ const Card = styled.div`
   display: flex;
   align-items: center;
   padding: 12px;
-  background: ${(props) => props.theme.colors.lightGray};
+  border: 1px solid ${(props) => props.theme.colors.lightGray};
+  color: ${(props) =>
+    props.status === "SUCCEED" ? "#155724" :
+    props.status === "FAILED" ? "#721c24" :
+    props.status === "BIDDING" ? "#856404" :
+    props.status === "PAYMENT_COMPLETED" ? "#004085" :
+    "#333"};
+  background: ${(props) =>
+    props.status === "SUCCEED" ? "#d4edda" :
+    props.status === "FAILED" ? "#f8d7da" :
+    props.status === "BIDDING" ? "#fff3cd" :
+    props.status === "PAYMENT_COMPLETED" ? "#cce5ff" :
+    "#eee"};
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${(props) => props.theme.colors.gray};
+    opacity: 0.8;
   }
 `;
 
@@ -122,14 +134,14 @@ const BidHistory = () => {
       <Title>입찰 내역</Title>
       <List>
         {bids.map((bid) => (
-          <Card key={bid.bidId} onClick={() => navigate(`/bids/${bid.bidId}`)}>
+          <Card key={bid.bidId} onClick={() => navigate(`/bids/${bid.bidId}`)} status={bid.biddingStatus} >
             <ImageWrapper>
               <Image src={bid.searchAuctionItemRes.imageUrl ? `${IMAGE_BASE_URL}${bid.searchAuctionItemRes.imageUrl}` : defaultImage} alt={bid.searchAuctionItemRes.name} />
             </ImageWrapper>
             <Info>
               <ItemName>{bid.searchAuctionItemRes.name}</ItemName>
-              <BidInfo>💰 입찰가: {bid.biddingPrice.toLocaleString()}원</BidInfo>
-              <BidInfo>📌 상태: {bid.biddingStatus}</BidInfo>
+              <BidInfo>입찰가: {bid.biddingPrice.toLocaleString()}원</BidInfo>
+              <BidInfo>상태: {bid.biddingStatus}</BidInfo>
             </Info>
           </Card>
         ))}

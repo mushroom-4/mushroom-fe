@@ -1,77 +1,108 @@
 import { useEffect, useState } from "react";
-import {useNavigate, useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { fetchBidDetail } from "../../api/bid";
 import defaultImage from "../../assets/background.png";
-import {IMAGE_BASE_URL} from "../../config";
+import { IMAGE_BASE_URL } from "../../config";
 import PaymentModal from "../../components/PaymentModal";
 import BackButton from "../../components/common/BackButton";
 
-
 const Container = styled.div`
-  max-width: 600px;
-  margin: 40px auto;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-`;
-
-const Title = styled.h2`
-  text-align: center;
-  margin-bottom: 20px;
-`;
-
-const ImageWrapper = styled.div`
-  width: 100%;
-  height: 200px;
-  background: ${(props) => props.theme.colors.lightGray};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
+  max-width: 650px;
+  margin: 50px auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
 `;
 
 const Image = styled.img`
-  width: 100%;
-  height: 100%;
+  width: 150px;
+  height: 150px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 20px;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.7;
+  }
 `;
 
-const Info = styled.div`
+const BidInfoSection = styled.div`
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
   margin-top: 20px;
 `;
 
 const DetailItem = styled.p`
-  font-size: 14px;
-  margin: 5px 0;
+  font-size: 15px;
+  margin: 6px 0;
+  color: #555;
 `;
 
-const Loading = styled.p`
+const HighlightText = styled.span`
+  font-size: 16px;
+  font-weight: bold;
+  color: #222;
+`;
+
+const AuctionStatus = styled.p`
   text-align: center;
   font-size: 16px;
-  color: ${(props) => props.theme.colors.darkGray};
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 8px;
+  margin-top: 16px;
+  color: ${(props) =>
+    props.status === "SUCCEED" ? "#155724" :
+    props.status === "FAILED" ? "#721c24" :
+    props.status === "BIDDING" ? "#856404" :
+    props.status === "PAYMENT_COMPLETED" ? "#004085" :
+    "#333"};
+  background: ${(props) =>
+    props.status === "SUCCEED" ? "#d4edda" :
+    props.status === "FAILED" ? "#f8d7da" :
+    props.status === "BIDDING" ? "#fff3cd" :
+    props.status === "PAYMENT_COMPLETED" ? "#cce5ff" :
+    "#eee"};
 `;
 
 const ButtonWrapper = styled.div`
   display: flex;
-  flex-direction: row-reverse;
+  justify-content: flex-end;
+  margin-top: 18px;
 `;
 
 const PayButton = styled.button`
-  padding: 10px 16px;
+  padding: 12px 16px;
   font-size: 16px;
+  font-weight: bold;
   border-radius: 8px;
   border: none;
-  background-color: ${(props) => (props.disabled ? "#bbb" : props.theme.colors.darkGray)};
+  background-color: ${(props) => (props.disabled ? "#bbb" : "#28a745")};
   color: white;
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  transition: background 0.3s ease-in-out;
 
   &:hover {
-    background-color: ${(props) => (props.disabled ? "#bbb" : props.theme.colors.gray)};
+    background-color: ${(props) => (props.disabled ? "#bbb" : "#218838")};
   }
 `;
+
+const ItemInfoSection = styled.div`
+  padding: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+`;
+
+const statusMessage = {
+  "BIDDING": "경매 진행 중",
+  "SUCCEED": "입찰 성공! 결제 가능",
+  "FAILED": "입찰 실패",
+  "CANCELED": "입찰 취소됨",
+  "PAYMENT_COMPLETED": "결제 완료! 배송 대기 중",
+};
 
 const BidDetail = () => {
   const { bidId } = useParams();
@@ -91,47 +122,71 @@ const BidDetail = () => {
     loadBidDetail();
   }, [bidId]);
 
-  if (loading) return <Loading>로딩 중...</Loading>;
-  if (!bid) return <Loading>데이터를 불러올 수 없습니다.</Loading>;
+  if (loading) return <p style={{ textAlign: "center", fontSize: "16px" }}>로딩 중...</p>;
+  if (!bid) return <p style={{ textAlign: "center", fontSize: "16px" }}>데이터를 불러올 수 없습니다.</p>;
 
   return (
     <>
       <BackButton />
       <Container>
-        <Title>입찰 내역 상세</Title>
-        <ImageWrapper>
-          <Image src={bid.searchAuctionItemRes.imageUrl
-              ? `${IMAGE_BASE_URL}${bid.searchAuctionItemRes.imageUrl}`
-              : defaultImage} alt={bid.searchAuctionItemRes.name}/>
-        </ImageWrapper>
-        <Info>
-          <DetailItem>📢 상품명: {bid.searchAuctionItemRes.name}</DetailItem>
-          <DetailItem>📂 카테고리: {bid.searchAuctionItemRes.category}</DetailItem>
-          <DetailItem>📏 사이즈: {bid.searchAuctionItemRes.size}</DetailItem>
-          <DetailItem>💰 입찰 가격: {bid.biddingPrice.toLocaleString()}원</DetailItem>
-          <DetailItem>⏳ 입찰 상태: {bid.biddingStatus}</DetailItem>
-          <DetailItem>🏷 브랜드: {bid.searchAuctionItemRes.brand}</DetailItem>
-          <DetailItem>💵 경매 시작가: {bid.searchAuctionItemRes.startPrice.toLocaleString()}원</DetailItem>
-          <DetailItem>📅 경매 시작: {new Date(bid.searchAuctionItemRes.startTime).toLocaleString("ko-KR")}</DetailItem>
-          <DetailItem>📅 경매 종료: {new Date(bid.searchAuctionItemRes.endTime).toLocaleString("ko-KR")}</DetailItem>
-          <DetailItem>🔍 경매 상태: {bid.searchAuctionItemRes.status}</DetailItem>
-        </Info>
-        <ButtonWrapper>
-        <PayButton onClick={() => setIsPaymentOpen(true)} disabled={bid.biddingStatus !== "SUCCEED"}>결제하기</PayButton>
-        </ButtonWrapper>
+        <AuctionStatus status={bid.biddingStatus}>{statusMessage[bid.biddingStatus]}</AuctionStatus>
         
+        <ItemInfoSection>
+        <Image
+            src={bid.searchAuctionItemRes.imageUrl
+              ? `${IMAGE_BASE_URL}${bid.searchAuctionItemRes.imageUrl}`
+              : defaultImage}
+            alt={bid.searchAuctionItemRes.name}
+            onClick={() => navigate(`/auction/${bid.searchAuctionItemRes.auctionItemId}`)}
+          />
+        <div>
+          <DetailItem>
+            상품명: <HighlightText>{bid.searchAuctionItemRes.name}</HighlightText>
+          </DetailItem>
+          <DetailItem>
+            브랜드: <HighlightText>{bid.searchAuctionItemRes.brand}</HighlightText>
+          </DetailItem>
+          <DetailItem>
+            카테고리: <HighlightText>{bid.searchAuctionItemRes.category}</HighlightText>
+          </DetailItem>
+          <DetailItem>
+            사이즈: <HighlightText>{bid.searchAuctionItemRes.size}</HighlightText>
+          </DetailItem>
+        </div>
+        </ItemInfoSection>
+        <BidInfoSection>
+          <DetailItem>
+            경매 시작가: <HighlightText>{bid.searchAuctionItemRes.startPrice.toLocaleString()}원</HighlightText>
+          </DetailItem>
+          <DetailItem>
+            입찰한 가격: <HighlightText>{bid.biddingPrice.toLocaleString()}원</HighlightText>
+          </DetailItem>
+          <DetailItem>
+            경매 시작: <HighlightText>{new Date(bid.searchAuctionItemRes.startTime).toLocaleString("ko-KR")}</HighlightText>
+          </DetailItem>
+          <DetailItem>
+            경매 종료: <HighlightText>{new Date(bid.searchAuctionItemRes.endTime).toLocaleString("ko-KR")}</HighlightText>
+          </DetailItem>
+        </BidInfoSection>
+
+        {/* 결제 버튼 */}
+        <ButtonWrapper>
+          <PayButton onClick={() => setIsPaymentOpen(true)} disabled={bid.biddingStatus !== "SUCCEED"}>
+            결제하기
+          </PayButton>
+        </ButtonWrapper>
 
         {isPaymentOpen && (
-            <PaymentModal
-                isOpen={isPaymentOpen}
-                onRequestClose={() => setIsPaymentOpen(false)}
-                orderId={`${window.btoa(Math.random()).slice(0, 20)}${bidId}`}
-                amount={bid.biddingPrice}
-                onPaymentFail={() => navigate("/payment-fail", { state: { message: "결제 실패2", bidId }})}
-            />
+          <PaymentModal
+            isOpen={isPaymentOpen}
+            onRequestClose={() => setIsPaymentOpen(false)}
+            orderId={`${window.btoa(Math.random()).slice(0, 20)}${bidId}`}
+            amount={bid.biddingPrice}
+            onPaymentFail={() => navigate("/payment-fail", { state: { message: "결제 실패", bidId } })}
+          />
         )}
       </Container>
-      </>
+    </>
   );
 };
 

@@ -81,6 +81,10 @@ const Image = styled.img`
   height: 50px;
   object-fit: cover;
   border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
 `;
 
 const Status = styled.span`
@@ -227,6 +231,7 @@ const Admin = () => {
                     <Image
                       src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage}
                       alt={item.name}
+                      onClick={() => navigate(`/auction/${item.auctionItemId}`)}
                     />
                   </Td>
                   <Td>{item.name}</Td>
