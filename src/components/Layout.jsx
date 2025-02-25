@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -121,6 +121,7 @@ const Section = styled.section`
   margin: 0 auto;
   max-width: 1100px;
   padding: 0 0 20px;
+  position: relative;
 `;
 
 const StyledLink = styled(Link)`
@@ -205,101 +206,112 @@ const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const context = useAuth();
+  
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [popularKeywords, setPopularKeywords] = useState([]);
+
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
   const searchInputRef = useRef(null);
 
-  const handleLogout = () => {
+  /** ✅ 로그아웃 핸들러 (useCallback으로 최적화) */
+  const handleLogout = useCallback(() => {
     context.logout();
     alert("로그아웃되었습니다.");
     navigate("/");
-  };
+  }, [context, navigate]);
 
-  const handleSearch = (query) => {
-    if (query.trim()) {
-      navigate(`/?keyword=${encodeURIComponent(query)}`);
-      setSearchOpen(false);
-    }
-  };
-
-  const handleInputChange = (e) => setKeyword(e.target.value);
-
-  const handleKeywordClick = (word) => {
-    setKeyword(word);
-    handleSearch(word);
-  };
-
-  useEffect(() => {
-    const getPopularKeywords = async () => {
-      const response = await fetchPopularKeywords();
-      if (response.success) {
-        setPopularKeywords(response.data);
-      }
-    }
-
-    const handleClickOutside = (event) => {
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target) &&
-        event.target !== document.getElementById("search-button")
-      ) {
+  /** ✅ 검색 실행 (useCallback 적용) */
+  const handleSearch = useCallback(
+    (query) => {
+      if (query.trim()) {
+        navigate(`/?keyword=${encodeURIComponent(query)}`);
         setSearchOpen(false);
       }
+    },
+    [navigate]
+  );
+
+  /** ✅ 검색어 변경 핸들러 */
+  const handleInputChange = useCallback((e) => setKeyword(e.target.value), []);
+
+  /** ✅ 인기 검색어 클릭 시 실행 */
+  const handleKeywordClick = useCallback(
+    (word) => {
+      setKeyword(word);
+      handleSearch(word);
+    },
+    [handleSearch]
+  );
+
+  /** ✅ 검색창 열릴 때 인기 검색어 가져오기 */
+  useEffect(() => {
+    if (!searchOpen) return;
+
+    let isMounted = true;
+
+    const getPopularKeywords = async () => {
+      const response = await fetchPopularKeywords();
+      if (response.success && isMounted) {
+        setPopularKeywords(response.data);
+      }
     };
-  
-    if (searchOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      setTimeout(() => {
-        searchInputRef.current?.focus(); // ✅ 검색창이 열릴 때 자동 focus
-      }, 100);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
+
     getPopularKeywords();
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      isMounted = false;
+    };
   }, [searchOpen]);
 
-
-
+  /** ✅ 검색창 & 드롭다운 바깥 클릭 시 닫기 */
   useEffect(() => {
     const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target) && event.target.id !== "search-button") {
+        setSearchOpen(false);
+        searchInputRef.current?.blur();
+      }
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
     };
 
-    if (dropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
+    document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [dropdownOpen]);
+  }, []);
+
+  /** ✅ 검색창이 열릴 때 자동 focus */
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+  }, [searchOpen]);
 
   return (
     <Container>
+      {/* ✅ 헤더 */}
       <HeaderContainer>
         <Header>
           <HomeLogoLink to="/">
             <LogoImage src={mainLogo} alt="멋이룸" />
           </HomeLogoLink>
           <Nav>
-          {location.pathname === "/" && (
-              <SearchImg onClick={() => setSearchOpen(!searchOpen)} id="search-button" src={searchIcon} alt="검색" />
+            {/* ✅ "/" 경로에서만 검색 버튼 표시 */}
+            {location.pathname === "/" && (
+              <SearchImg id="search-button" src={searchIcon} alt="검색" onClick={() => setSearchOpen(!searchOpen)} />
             )}
             {context.isAuthenticated ? (
               <>
-                {context.user.userRole === "ADMIN" && <StyledLink to="/admin">관리자 물품 관리</StyledLink>}
                 <ProfileContainer ref={dropdownRef} onClick={() => setDropdownOpen(!dropdownOpen)}>
                   <ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" hover />
                   {dropdownOpen && (
                     <DropdownMenu>
-                      <DropdownItem onClick={() => navigate("/profile")} dark><ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" /><strong>{context.user.nickname}</strong></DropdownItem>
+                      <DropdownItem onClick={() => navigate("/profile")} dark>
+                        <ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" />
+                        <strong>{context.user.nickname}</strong>
+                      </DropdownItem>
                       <DropdownItem onClick={() => navigate("/notices")}>공지 사항</DropdownItem>
                       <DropdownItem onClick={() => navigate("/wishlist")}>관심있는 물품</DropdownItem>
                       <DropdownItem onClick={() => navigate("/registrations")}>물품 관리</DropdownItem>
@@ -318,29 +330,32 @@ const Layout = () => {
           </Nav>
         </Header>
       </HeaderContainer>
-        <SearchContainer ref={searchRef} visible={searchOpen}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <SearchInput
-            type="text"
-            ref={searchInputRef}
-            placeholder="검색어 입력..."
-            value={keyword}
-            onChange={handleInputChange}
-            onKeyUp={(e) => e.key === "Enter" && handleSearch(keyword)}
-          />
-          <SearchImg src={searchIcon} alt="검색" onClick={() => handleSearch(keyword)} />
-        </div>
-        {/* ✅ 인기 검색어 목록 */}
-        {popularKeywords.length > 0 && (
-          <PopularKeywordsContainer>
-            {popularKeywords.map((word, index) => (
-              <KeywordTag key={index} onClick={() => handleKeywordClick(word)}>
-                {word}
-              </KeywordTag>
-            ))}
-          </PopularKeywordsContainer>
-        )}
-      </SearchContainer>
+
+      {/* ✅ 검색창 */}
+      <SearchContainer ref={searchRef} visible={searchOpen}>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <SearchInput
+              ref={searchInputRef}
+              type="text"
+              placeholder="검색어 입력..."
+              value={keyword}
+              onChange={handleInputChange}
+              onKeyUp={(e) => e.key === "Enter" && handleSearch(keyword)}
+            />
+            <SearchImg src={searchIcon} alt="검색" onClick={() => handleSearch(keyword)} />
+          </div>
+          {/* ✅ 인기 검색어 */}
+          {popularKeywords.length > 0 && (
+            <PopularKeywordsContainer>
+              {popularKeywords.map((word, index) => (
+                <KeywordTag key={index} onClick={() => handleKeywordClick(word)}>
+                  {word}
+                </KeywordTag>
+              ))}
+            </PopularKeywordsContainer>
+          )}
+        </SearchContainer>
+
       <HeaderDummy />
       <Section>
         <Outlet />

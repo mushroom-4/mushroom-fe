@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
     PAYMENT: `/api/v2/payments/confirm/widget`,
     CHAT: (chatRoomId) => `/api/v2/bids/chats/${chatRoomId}`,
     POPULAR: `/api/v1/auction-items/popular-keywords`,
+    NOTICE: `/api/v2/users/notices`,
   },
   USER: {
     REGISTRATIONS: `/api/v1/users/registrations`,
