@@ -101,7 +101,6 @@ const ReviewSection = styled.div`
   max-width: 650px;
   margin: 20px auto;
   border-radius: 8px;
-  background: #f9f9f9;
   display: flex;
   flex-direction: column;
   text-align: center;

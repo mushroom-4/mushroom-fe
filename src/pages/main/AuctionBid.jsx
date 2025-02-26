@@ -319,7 +319,7 @@ const AuctionBid = () => {
       if (response1.success) {
         setItem(response1.data);
         setHighestBid(response1.data.bid ? response1.data.bid.maxPrice : response1.data.startPrice);
-        setHighestBidder({
+        response1.data.bid && setHighestBidder({
           nickname: response1.data.bid.bidderNickname,
           imageUrl: response1.data.bid.imageUrl,
         });
@@ -498,14 +498,14 @@ const AuctionBid = () => {
 
       <BiddingSection>
       <TimerText timeLeft={parseInt(timeLeft.split(":")[2]) + parseInt(timeLeft.split(":")[1]) * 60 + parseInt(timeLeft.split(":")[0]) * 60 * 60}>{timeLeft}</TimerText>
-        <HighestBidderContainer>
+        {highestBidder && <HighestBidderContainer>
           <span>현재 최고 입찰자: </span>
           <div>
             <ProfileImage src={getProfileImageSrc(highestBidder.imageUrl)} alt="최고 입찰자 프로필" />
             <HighestBidderText>{highestBidder.nickname}</HighestBidderText>
           </div>
           <PriceText>{highestBid.toLocaleString()}원</PriceText>
-        </HighestBidderContainer>
+        </HighestBidderContainer>}
         <br/>
         {bidIncrements.map((increment, i) => (
           <BidButton key={increment} onClick={() => handleBidClick(increment)} disabled={!isLogin} tier={i + 1}>
