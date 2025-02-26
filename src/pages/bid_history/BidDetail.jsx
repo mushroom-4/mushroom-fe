@@ -6,6 +6,7 @@ import { getItemImageSrc } from "../../utils/image";
 import PaymentModal from "../../components/PaymentModal";
 import BackButton from "../../components/common/BackButton";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { createSellerReview } from "../../api/review";
 
 const Container = styled.div`
   max-width: 650px;
@@ -96,6 +97,60 @@ const ItemInfoSection = styled.div`
   gap: 20px;
 `;
 
+const ReviewSection = styled.div`
+  max-width: 650px;
+  margin: 20px auto;
+  border-radius: 8px;
+  background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  
+  & > div {
+    display: flex;
+    padding: 1rem 0;
+    align-items: center;
+    gap: 1rem;
+    justify-content: space-between;
+  }
+`;
+
+const ReviewTextArea = styled.textarea`
+  width: 100%;
+  height: 80px;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: none;
+`;
+
+const ReviewScoreInput = styled.input`
+  width: 50px;
+  padding: 6px;
+  font-size: 14px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+`;
+
+const SubmitReviewButton = styled.button`
+  padding: 10px 14px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  margin-top: 12px;
+  background-color: ${(props) => (props.disabled ? props.theme.colors.lightGray : props.theme.colors.darkGray)};
+  color: white;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  transition: background 0.3s ease-in-out;
+
+  &:hover {
+    background-color: ${(props) => (props.disabled ? props.theme.colors.lightGray : props.theme.colors.gray)};
+  }
+`;
+
 const statusMessage = {
   "BIDDING": "경매 진행 중",
   "SUCCEED": "입찰 성공! 결제 가능",
@@ -110,6 +165,9 @@ const BidDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const navigate = useNavigate();
+  const [reviewScore, setReviewScore] = useState(10);
+  const [reviewContent, setReviewContent] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const loadBidDetail = async () => {
@@ -121,6 +179,37 @@ const BidDetail = () => {
 
     loadBidDetail();
   }, [bidId]);
+
+  const handleSubmitReview = async () => {
+    if (reviewScore < 1 || reviewScore > 10) {
+      alert("점수는 1~10 사이로 입력해주세요.");
+      return;
+    }
+    if (!reviewContent.trim()) {
+      alert("리뷰 내용을 입력해주세요.");
+      return;
+    }
+    if (reviewContent.length > 100) {
+      alert("리뷰 내용은 100자 이내로 입력해주세요.");
+      return;
+    }
+  
+    setIsSubmitting(true);
+  
+    const response = await createSellerReview(bidId, {
+      score: reviewScore,
+      content: reviewContent,
+    });
+  
+    if (response.success) {
+      alert("리뷰가 성공적으로 등록되었습니다.");
+      window.location.reload(); // 새로고침하여 리뷰 반영
+    } else {
+      alert(response.message);
+    }
+  
+    setIsSubmitting(false);
+  };
 
   if (loading) return <LoadingSpinner />;
   if (!bid) return <p style={{ textAlign: "center", fontSize: "16px" }}>데이터를 불러올 수 없습니다.</p>;
@@ -184,6 +273,32 @@ const BidDetail = () => {
           />
         )}
       </Container>
+      {bid.biddingStatus === "PAYMENT_COMPLETED" && (
+        <ReviewSection>
+          <div>
+            <h3>판매자 리뷰 작성</h3>
+            <div>
+              <label>점수: </label>
+              <ReviewScoreInput
+                type="number"
+                min="1"
+                max="10"
+                value={reviewScore}
+                onChange={(e) => setReviewScore(Number(e.target.value))}
+              />
+            </div>
+          </div>
+          <ReviewTextArea
+            placeholder="리뷰 내용을 입력하세요 (최대 100자)"
+            maxLength={100}
+            value={reviewContent}
+            onChange={(e) => setReviewContent(e.target.value)}
+          />
+          <SubmitReviewButton onClick={handleSubmitReview} disabled={isSubmitting}>
+            리뷰 제출
+          </SubmitReviewButton>
+        </ReviewSection>
+      )}
     </>
   );
 };

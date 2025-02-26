@@ -336,7 +336,7 @@ const AuctionItemDetail = () => {
                 navigate(`/auction/${review.bid.auctionItemId}`);
               }}>
               <ReviewText>{review.bid.bidderName}: "{review.content}"</ReviewText>
-              <ReviewBidInfo>⭐ {review.score} | {review.bid.auctionItemName} ({review.bid.biddingPrice}원)</ReviewBidInfo>
+              <ReviewBidInfo>⭐ {review.score} | {review.bid.auctionItemName} ({review.bid.biddingPrice.toLocaleString()}원)</ReviewBidInfo>
             </ReviewItem>
           ))
         ) : (
