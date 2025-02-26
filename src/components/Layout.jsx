@@ -3,10 +3,10 @@ import styled from "styled-components";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import mainLogo from "../assets/mainLogo.png";
-import backgroundImage from "../assets/background.png";
-import defaultProfile from "../assets/default-profile.png"; // 기본 프로필 이미지
+import backgroundImage from "../assets/default-item.png";
 import searchIcon from "../assets/icon-search.svg";
 import { fetchPopularKeywords } from "../api/auctionItem";
+import { getProfileImageSrc } from "../utils/image";
 
 const Container = styled.div`
   position: relative;
@@ -306,11 +306,11 @@ const Layout = () => {
               <>
                 {context.user.userRole === "ADMIN" && <StyledLink to="/admin">관리자 물품 관리</StyledLink>}
                 <ProfileContainer ref={dropdownRef} onClick={() => setDropdownOpen(!dropdownOpen)}>
-                  <ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" hover />
+                  <ProfileImage src={getProfileImageSrc(context.user.imageUrl)} alt="프로필" hover />
                   {dropdownOpen && (
                     <DropdownMenu>
                       <DropdownItem onClick={() => navigate("/profile")} dark>
-                        <ProfileImage src={context.user.imageUrl || defaultProfile} alt="프로필" />
+                        <ProfileImage src={getProfileImageSrc(context.user.imageUrl)} alt="프로필" />
                         <strong>{context.user.nickname}</strong>
                       </DropdownItem>
                       <DropdownItem onClick={() => navigate("/notices")}>공지 사항</DropdownItem>

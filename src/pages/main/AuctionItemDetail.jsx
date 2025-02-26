@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { fetchAuctionItemDetail, fetchAuctionItemLike, likeAuctionItems, unlikeAuctionItems } from "../../api/auctionItem";
-import defaultImage from "../../assets/background.png";
-import {IMAGE_BASE_URL} from "../../config";
 import { isAuthenticated } from "../../utils/auth";
 import BackButton from "../../components/common/BackButton";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { getItemImageSrc } from "../../utils/image";
 
 const Container = styled.div`
   max-width: 800px;
@@ -171,7 +170,7 @@ const AuctionItemDetail = () => {
       <BackButton />
       <Container>
       {isLogin ? <LikeButton onClick={() => handleLike(isLiked)} isLiked={isLiked}>{isLiked ? "좋아요 취소" : "좋아요"}</LikeButton>: <></>}
-      <Image src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage} alt={item.name} />
+      <Image src={getItemImageSrc(item.imageUrl)} alt={item.name} />
       <Info>
         <Title>{item.brand} - {item.name}</Title>
         <Description>{item.description}</Description>

@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { allLikeAuctionItems } from "../../api/auctionItem";
-import defaultImage from "../../assets/background.png";
 import { useNavigate } from "react-router-dom";
-import {IMAGE_BASE_URL} from "../../config";
+import { getItemImageSrc } from "../../utils/image";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const Container = styled.div`
@@ -152,7 +151,7 @@ const Wishlist = () => {
           <Card key={item.auctionItemId} onClick={() => navigate(`/auction/${item.auctionItemId}`)}>
             <ImageWrapper>
               <Image
-                src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage}
+                src={getItemImageSrc(item.imageUrl)}
                 alt={item.name}
               />
             </ImageWrapper>

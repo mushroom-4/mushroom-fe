@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { fetchAuctionItemDetail, updateAuctionItem, deleteAuctionItem } from "../../api/auctionRegistration";
-import { IMAGE_BASE_URL } from "../../config";
+import { getItemImageSrc } from "../../utils/image";
 
 const Form = styled.form`
   max-width: 600px;
@@ -102,7 +102,7 @@ const AuctionItemEdit = () => {
         });
 
         if (response.data.imageUrl) {
-          setImagePreview(`${IMAGE_BASE_URL}${response.data.imageUrl}`);
+          setImagePreview(getItemImageSrc(response.data.imageUrl));
         }
       } else {
         alert(response.message);

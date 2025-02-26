@@ -2,10 +2,9 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import {IMAGE_BASE_URL} from "../../config";
 import { fetchAdminAuctionItems, setStatusAdminAuctionItems } from "../../api/auctionItem";
-import defaultImage from "../../assets/background.png";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { getItemImageSrc } from "../../utils/image";
 
 const Container = styled.div`
   max-width: 1200px;
@@ -229,7 +228,7 @@ const Admin = () => {
                 <TableRow key={item.auctionItemId}>
                   <Td>
                     <Image
-                      src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage}
+                      src={getItemImageSrc(item.imageUrl)}
                       alt={item.name}
                       onClick={() => navigate(`/auction/${item.auctionItemId}`)}
                     />

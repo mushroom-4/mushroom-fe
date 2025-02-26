@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { fetchRegisteredAuctionItems } from "../../api/auctionRegistration";
-import defaultImage from "../../assets/background.png";
-import {IMAGE_BASE_URL} from "../../config";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { getItemImageSrc } from "../../utils/image";
 
 const Container = styled.div`
   padding: 20px;
@@ -105,7 +104,7 @@ const AuctionRegistrationList = () => {
         <List>
           {auctionItems.map((item) => (
             <Card key={item.auctionItemId} onClick={() => navigate(`/auction/${item.auctionItemId}/edit`)}>
-              <Image src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage} alt={item.name} />
+              <Image src={getItemImageSrc(item.imageUrl)} alt={item.name} />
               <Content>
                 <Title>{item.brand} - {item.name}</Title>
                 <Status>상태: {item.auctionItemStatus}</Status>

@@ -245,7 +245,8 @@ const TimerText = styled.p`
     if (timeLeft < 10) return "#ff0000"; // 10초 미만: 빨간색
     if (timeLeft < 60) return "#ff6600"; // 1분 미만: 주황색
     if (timeLeft < 300) return "#ffaa00"; // 5분 미만: 노란색
-    return "#11dd00";
+    if (timeLeft < 3600) return "#11dd00"; // 1시간 미만: 초록색
+    return "#444444";
   }};
   transition: color 0.5s ease-in-out;
 `;

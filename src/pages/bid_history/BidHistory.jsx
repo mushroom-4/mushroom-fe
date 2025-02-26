@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { fetchBidHistory } from "../../api/bid";
-import defaultImage from "../../assets/background.png";
-import {IMAGE_BASE_URL} from "../../config";
+import { getItemImageSrc } from "../../utils/image";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const Container = styled.div`
@@ -148,7 +147,7 @@ const BidHistory = () => {
         {bids.map((bid) => (
           <Card key={bid.bidId} onClick={() => navigate(`/bids/${bid.bidId}`)} status={bid.biddingStatus} >
             <ImageWrapper>
-              <Image src={bid.searchAuctionItemRes.imageUrl ? `${IMAGE_BASE_URL}${bid.searchAuctionItemRes.imageUrl}` : defaultImage} alt={bid.searchAuctionItemRes.name} />
+              <Image src={getItemImageSrc(bid.searchAuctionItemRes.imageUrl)} alt={bid.searchAuctionItemRes.name} />
             </ImageWrapper>
             <Info>
               <ItemName>{bid.searchAuctionItemRes.name}</ItemName>

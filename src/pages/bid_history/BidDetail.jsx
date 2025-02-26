@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { fetchBidDetail } from "../../api/bid";
-import defaultImage from "../../assets/background.png";
-import { IMAGE_BASE_URL } from "../../config";
+import { getItemImageSrc } from "../../utils/image";
 import PaymentModal from "../../components/PaymentModal";
 import BackButton from "../../components/common/BackButton";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
@@ -134,9 +133,7 @@ const BidDetail = () => {
         
         <ItemInfoSection>
         <Image
-            src={bid.searchAuctionItemRes.imageUrl
-              ? `${IMAGE_BASE_URL}${bid.searchAuctionItemRes.imageUrl}`
-              : defaultImage}
+            src={getItemImageSrc(bid.searchAuctionItemRes.imageUrl)}
             alt={bid.searchAuctionItemRes.name}
             onClick={() => navigate(`/auction/${bid.searchAuctionItemRes.auctionItemId}`)}
           />

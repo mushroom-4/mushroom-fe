@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { fetchAuctionItems } from "../../api/auctionItem";
-import defaultImage from "../../assets/background.png";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import {IMAGE_BASE_URL} from "../../config";
 import filterIcon from "../../assets/icon-filter.svg";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { getItemImageSrc } from "../../utils/image";
 
 const Container = styled.div`
   display: flex;
@@ -381,7 +380,7 @@ const Home = () => {
           <Card key={item.auctionItemId} onClick={() => navigate(`/auction/${item.auctionItemId}`)}>
             <ImageWrapper>
               <Image
-                src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage}
+                src={getItemImageSrc(item.imageUrl)}
                 alt={item.name}
               />
             </ImageWrapper>
