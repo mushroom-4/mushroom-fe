@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import filterIcon from "../../assets/icon-filter.svg";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { getItemImageSrc } from "../../utils/image";
+import Pagination from "../../components/common/Pagination";
 
 const Container = styled.div`
   display: flex;
@@ -177,27 +178,6 @@ const Timestamp = styled.p`
   font-size: 12px;
   color: gray;
   margin: 4px 0;
-`;
-
-const Pagination = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  gap: 10px;
-`;
-
-const PageButton = styled.button`
-  padding: 8px 12px;
-  border: none;
-  cursor: pointer;
-  background: ${(props) => props.theme.colors.darkGray};
-  color: white;
-  border-radius: 5px;
-
-  &:disabled {
-    background: #bbb;
-    cursor: not-allowed;
-  }
 `;
 
 const Home = () => {
@@ -400,22 +380,11 @@ const Home = () => {
         ))}
       </Container>
 
-      {/* 페이지네이션 */}
-      <Pagination>
-      <PageButton
-        disabled={parseInt(filters.page, 10) === 1}
-        onClick={() => handlePageChange(parseInt(filters.page, 10) - 1)}
-      >
-        이전
-      </PageButton>
-      <span>{filters.page} / {totalPages}</span>
-      <PageButton
-        disabled={parseInt(filters.page, 10) >= totalPages}
-        onClick={() => handlePageChange(parseInt(filters.page, 10) + 1)}
-      >
-        다음
-      </PageButton>
-    </Pagination>
+      <Pagination
+        currentPage={parseInt(filters.page, 10)}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </>
   );
 };
