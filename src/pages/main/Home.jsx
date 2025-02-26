@@ -89,7 +89,7 @@ const FilterSelect = styled.select`
 
 const ButtonGroup = styled.div`
   display: flex;
-  justify-content: space-between;
+  flex-direction: row-reverse;
   margin-top: 12px;
 `;
 
@@ -245,6 +245,7 @@ const Home = () => {
   };
 
   const handleSearch = () => {
+    setFilters({...filters, page: "1"});
     const newParams = new URLSearchParams(filters);
     if (filters.keyword) {
       newParams.set("keyword", encodeURIComponent(filters.keyword));
@@ -252,19 +253,19 @@ const Home = () => {
     setSearchParams(newParams);
   };
 
-  const resetFilters = () => {
-    setFilters({
-      brand: "",
-      category: "",
-      size: "",
-      minPrice: "",
-      maxPrice: "",
-      startDate: "",
-      endDate: "",
-      page: "1",
-    });
-    setSearchParams(new URLSearchParams());
-  };
+  // const resetFilters = () => {
+  //   setFilters({
+  //     brand: "",
+  //     category: "",
+  //     size: "",
+  //     minPrice: "",
+  //     maxPrice: "",
+  //     startDate: "",
+  //     endDate: "",
+  //     page: "1",
+  //   });
+  //   setSearchParams(new URLSearchParams());
+  // };
   
   if (loading) return <LoadingSpinner />;
   
@@ -351,7 +352,6 @@ const Home = () => {
         </FilterGroup>
         <ButtonGroup>
           <FilterButton onClick={handleSearch} dark>필터링</FilterButton>
-          <FilterButton onClick={resetFilters}>초기화</FilterButton>
         </ButtonGroup>
       </FilterContainer>
       {/* 경매 아이템 리스트 */}
