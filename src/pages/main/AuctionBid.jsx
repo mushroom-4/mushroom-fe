@@ -243,8 +243,8 @@ const TimerText = styled.p`
   font-weight: bold;
   color: ${({ timeLeft }) => {
     if (timeLeft < 10) return "#ff0000"; // 10초 미만: 빨간색
-    if (timeLeft < 60) return "#ff6600"; // 1분 미만: 주황색
-    if (timeLeft < 300) return "#ffaa00"; // 5분 미만: 노란색
+    if (timeLeft < 60) return "#ff5500"; // 1분 미만: 주황색
+    if (timeLeft < 600) return "#ffaa00"; // 10분 미만: 노란색
     if (timeLeft < 3600) return "#11dd00"; // 1시간 미만: 초록색
     return "#444444";
   }};
@@ -327,7 +327,7 @@ const AuctionBid = () => {
       const response2 = await auctionItemChat(auctionItemId);
       if (response2.success) {
         const receivedMessage = response2.data;
-        setChatMessages((prev) => [...prev, ...receivedMessage]);
+        setChatMessages(receivedMessage);
       }
       setLoading(false);
       setTimeout(() => {
