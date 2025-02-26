@@ -10,6 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import BackButton from "../../components/common/BackButton";
 import { getProfileImageSrc } from "../../utils/image";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { formatDate } from "../../utils/date";
 
 /** ✅ 전체 컨테이너 */
 const Container = styled.div`
@@ -476,7 +477,7 @@ const AuctionBid = () => {
               <MessageInfo isMe={isMe}>
                 <span>{msg.nickname}</span>
                 <span>·</span>
-                <span>{new Date(msg.sendDateTime).toLocaleTimeString()}</span>
+                <span>{formatDate(new Date(msg.sendDateTime))}</span>
               </MessageInfo>
             </ChatMessage>
             );
