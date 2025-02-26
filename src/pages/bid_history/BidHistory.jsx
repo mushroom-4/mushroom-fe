@@ -139,12 +139,12 @@ const BidHistory = () => {
   }, [currentPage]);
 
   if (loading) return <LoadingSpinner />;
+  if (bids.length === 0) return <NoBidMessage>입찰 내역이 없습니다.</NoBidMessage>;
 
   return (
     <Container>
       <Title>입찰 내역</Title>
       <List>
-        bids.length === 0 ? (<NoBidMessage>입찰 내역이 없습니다.</NoBidMessage>) :(
         {bids.map((bid) => (
           <Card key={bid.bidId} onClick={() => navigate(`/bids/${bid.bidId}`)} status={bid.biddingStatus} >
             <ImageWrapper>
@@ -156,7 +156,7 @@ const BidHistory = () => {
               <BidInfo>상태: {bid.biddingStatus}</BidInfo>
             </Info>
           </Card>
-        ))})
+        ))}
       </List>
 
       <Pagination>

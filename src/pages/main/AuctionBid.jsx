@@ -216,13 +216,15 @@ const ButtonGroup = styled.div`
 const HighestBidderContainer = styled.div`
   display: flex;
   flex-direction: column;
+  gap: 10px;
   align-items: center;
   
   background: white;
-  padding: 40px 20px;
+  padding: 30px 20px;
   border-radius: 10px;
   margin-top: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   & > div {
     display: flex;
     align-items: center;
@@ -358,9 +360,10 @@ const AuctionBid = () => {
             setChatMessages((prev) => [...prev, receivedMessage]);
           }
           if (receivedMessage.messageType !== "MESSAGE") {
-            const bidAmountMatch = receivedMessage.message.match(/(\d+)(?=원에 입찰하였습니다\.)/);
+            const bidAmountMatch = receivedMessage.message.match(/([\d,]+)(?=원에 입찰하였습니다\.)/);
             if (bidAmountMatch) {
-              setHighestBid(Number(bidAmountMatch[1]));
+              const bidAmount = Number(bidAmountMatch[1].replace(/,/g, ''));
+              setHighestBid(bidAmount);
               setHighestBidder({
                 nickname: receivedMessage.nickname,
                 imageUrl: receivedMessage.imageUrl,
@@ -421,7 +424,7 @@ const AuctionBid = () => {
       setMessage("");
     } catch (error) {
       console.error("🚨 메시지 전송 오류:", error);
-      alert("입찰 내역이 없으셔서 채팅을 하실 수 없습니다.");
+      alert("입찰 내역이 없어서 채팅을 할 수 없습니다.");
     }    
   };
 
