@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { fetchAdminAuctionItems, setStatusAdminAuctionItems } from "../../api/auctionItem";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { getItemImageSrc } from "../../utils/image";
+import Pagination from "../../components/common/Pagination";
 
 const Container = styled.div`
   max-width: 1200px;
@@ -121,27 +122,6 @@ const Button = styled.button`
   }
 `;
 
-const Pagination = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  gap: 10px;
-`;
-
-const PageButton = styled.button`
-  padding: 8px 12px;
-  border: none;
-  cursor: pointer;
-  background: ${(props) => props.theme.colors.darkGray};
-  color: white;
-  border-radius: 5px;
-
-  &:disabled {
-    background: #bbb;
-    cursor: not-allowed;
-  }
-`;
-
 const Admin = () => {
   const statusList = ["INSPECTING", "REJECTED", "WAITING", "PROGRESSING", "COMPLETED", "NON_TRADED"];
   const navigate = useNavigate();
@@ -255,17 +235,11 @@ const Admin = () => {
               ))}
             </tbody>
           </Table>
-
-          {/* Pagination */}
-          <Pagination>
-            <PageButton disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
-              이전
-            </PageButton>
-            <span>{currentPage} / {totalPages}</span>
-            <PageButton disabled={currentPage >= totalPages} onClick={() => setCurrentPage(currentPage + 1)}>
-              다음
-            </PageButton>
-          </Pagination>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </>
       )}
     </Container>);
