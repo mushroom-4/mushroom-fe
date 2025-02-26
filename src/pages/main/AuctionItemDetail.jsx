@@ -157,13 +157,28 @@ const ModalContent = styled.div`
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 `;
 
-const ReviewItem = styled.div`
+const ReviewImage = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-right: 12px;
+  border: 1px solid #ddd;
+`;
+
+const ReviewContent = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 12px;
+`;
+
+const ReviewItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
   border-bottom: 1px solid #ddd;
   cursor: pointer;
   transition: background 0.2s;
+  gap: 6px;
 
   &:hover {
     background: #f9f9f9;
@@ -180,6 +195,10 @@ const ReviewBidInfo = styled.span`
   color: ${(props) => props.theme.colors.gray};
 `;
 
+const formatScore = (score) => {
+  if (Number.isInteger(score * 10)) return score.toString();
+  return score.toFixed(2);
+};
 
 const AuctionItemDetail = () => {
   const navigate = useNavigate();
@@ -279,7 +298,7 @@ const AuctionItemDetail = () => {
         <SellerProfile src={getProfileImageSrc(item.seller.imageUrl)} alt="판매자 프로필" />
         <SellerInfo>
           <SellerName>{item.seller.nickname}</SellerName>
-          <SellerRating>{item.seller.averageScore === 0 ? "" : `⭐ ${item.seller.averageScore}`} ({item.seller.totalReviewCount}개 리뷰)</SellerRating>
+          <SellerRating>{item.seller.averageScore === 0 ? "" : `⭐ ${formatScore(item.seller.averageScore)}`} ({item.seller.totalReviewCount}개 리뷰)</SellerRating>
         </SellerInfo>
       </SellerContainer>
       {isLogin ? <LikeButton onClick={() => handleLike(isLiked)} isLiked={isLiked}>{isLiked ? "좋아요 취소" : "좋아요"}</LikeButton>: <></>}
@@ -328,15 +347,19 @@ const AuctionItemDetail = () => {
   {isReviewModalOpen && (
     <ModalOverlay onClick={() => setIsReviewModalOpen(false)}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
-        <h3>{item.seller.nickname}님의 리뷰 ({sellerReviews.length}개) {item.seller.averageScore === 0 ? "" : `⭐ ${item.seller.averageScore}`}</h3>
+        <h3>{item.seller.nickname}님의 리뷰 ({sellerReviews.length}개) {item.seller.averageScore === 0 ? "" : `⭐ ${formatScore(item.seller.averageScore)}`}</h3>
         {sellerReviews.length > 0 ? (
           sellerReviews.map((review) => (
             <ReviewItem key={review.reviewId} onClick={() => {
-                setIsReviewModalOpen(false);
-                navigate(`/auction/${review.bid.auctionItemId}`);
-              }}>
-              <ReviewText>{review.bid.bidderName}: "{review.content}"</ReviewText>
-              <ReviewBidInfo>⭐ {review.score} | {review.bid.auctionItemName} ({review.bid.biddingPrice.toLocaleString()}원)</ReviewBidInfo>
+              setIsReviewModalOpen(false);
+              navigate(`/auction/${review.bid.auctionItemId}`);
+            }}>
+              {/* 상품 이미지 추가 */}
+              <ReviewImage src={getItemImageSrc(review.bid.auctionItemImageUrl)} alt="상품 이미지" />
+              <ReviewContent>
+                <ReviewText>{review.bid.bidderName}: "{review.content}"</ReviewText>
+                <ReviewBidInfo>⭐ {review.score} | {review.bid.auctionItemName} ({review.bid.biddingPrice.toLocaleString()}원)</ReviewBidInfo>
+              </ReviewContent>
             </ReviewItem>
           ))
         ) : (
