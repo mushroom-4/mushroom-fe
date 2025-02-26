@@ -60,6 +60,10 @@ export const fetchPopularKeywords = () => {
   return request(API_ENDPOINTS.AUCTION.POPULAR, "GET", null, false, false);
 };
 
-export const fetchUserNotices = async () => {
+export const fetchUserNotices = () => {
   return request(API_ENDPOINTS.AUCTION.NOTICE, "GET", null, true, false);
+}
+
+export const fetchAuctionItemLike = (auctionItemId) => {
+  return request(API_ENDPOINTS.LIKE.SET_LIKE(auctionItemId), "GET", null, true, false);
 }

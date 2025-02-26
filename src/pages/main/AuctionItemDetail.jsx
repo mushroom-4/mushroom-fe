@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { fetchAuctionItemDetail, likeAuctionItems } from "../../api/auctionItem";
+import { fetchAuctionItemDetail, fetchAuctionItemLike, likeAuctionItems, unlikeAuctionItems } from "../../api/auctionItem";
 import defaultImage from "../../assets/background.png";
 import {IMAGE_BASE_URL} from "../../config";
 import { isAuthenticated } from "../../utils/auth";
@@ -54,13 +54,14 @@ const BidButton = styled.button`
   font-size: 16px;
   border-radius: 8px;
   border: none;
-  background-color: ${(props) => (props.disabled ? "#bbb" : props.theme.colors.darkGray)};
+  background-color: ${(props) => (props.disabled ? props.theme.colors.lightGray : props.theme.colors.darkGray)};
   color: white;
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
 
   &:hover {
-    background-color: ${(props) => (props.disabled ? "#bbb" : props.theme.colors.gray)};
+    background-color: ${(props) => (props.disabled ? props.theme.colors.lightGray : props.theme.colors.gray)};
   }
+
 `;
 
 const LikeButton = styled.button`
@@ -70,9 +71,10 @@ const LikeButton = styled.button`
   font-size: 16px;
   border-radius: 8px;
   border: none;
-  background-color: ${(props) => props.theme.colors.darkGray};
+  background-color: ${(props) => (props.isLiked ? props.theme.colors.lightGray : props.theme.colors.darkGray)};
   color: white;
   cursor: pointer;
+
   &:hover {
     background-color: ${(props) => props.theme.colors.gray};
   }
@@ -85,6 +87,11 @@ const TimerText = styled.p`
   margin-top: 10px;
 `;
 
+const NoItemMessage = styled.p`
+  text-align: center;
+  color: ${(props) => props.theme.colors.darkGray};
+  font-size: 16px;
+`;
 
 const AuctionItemDetail = () => {
   const navigate = useNavigate();
@@ -94,12 +101,19 @@ const AuctionItemDetail = () => {
   const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState("");
   const [isBiddingActive, setIsBiddingActive] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
       setLoading(true);
-      const response = await fetchAuctionItemDetail(auctionItemId);
-      setItem(response.data);
+      const auctionItemResp = await fetchAuctionItemDetail(auctionItemId);
+      const likeResp = await fetchAuctionItemLike(auctionItemId);
+      if (auctionItemResp.success) {
+        setItem(auctionItemResp.data);
+      }
+      if (likeResp.success) {
+        setIsLiked(likeResp.data.hasLike);
+      }
       setLoading(false);
     };
 
@@ -139,22 +153,24 @@ const AuctionItemDetail = () => {
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
   };
 
-  const handleLike = async () => {
-    const response = await likeAuctionItems(auctionItemId);
+  const handleLike = async (isLiked) => {
+    const response = isLiked ? await unlikeAuctionItems(auctionItemId) : await likeAuctionItems(auctionItemId);
     if (response.success) {
-      alert("관심 상품에 등록했습니다.");
+      alert(isLiked ? "관심 상품을 해제했습니다." : "관심 상품에 등록했습니다.");
+      setIsLiked(!isLiked);
     } else {
       alert(response.message);
     }
   }
 
   if (loading) return <LoadingSpinner />;
+  if (!item) return <NoItemMessage>잘못된 상품 정보 페이지 입니다.</NoItemMessage>;
 
   return (
     <>
       <BackButton />
       <Container>
-      {isLogin ? <LikeButton onClick={handleLike}>관심 갖기</LikeButton>: <></>}
+      {isLogin ? <LikeButton onClick={() => handleLike(isLiked)} isLiked={isLiked}>{isLiked ? "좋아요 취소" : "좋아요"}</LikeButton>: <></>}
       <Image src={item.imageUrl ? `${IMAGE_BASE_URL}${item.imageUrl}` : defaultImage} alt={item.name} />
       <Info>
         <Title>{item.brand} - {item.name}</Title>
