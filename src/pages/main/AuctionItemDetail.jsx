@@ -5,7 +5,8 @@ import { fetchAuctionItemDetail, fetchAuctionItemLike, likeAuctionItems, unlikeA
 import { isAuthenticated } from "../../utils/auth";
 import BackButton from "../../components/common/BackButton";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import { getItemImageSrc } from "../../utils/image";
+import { getItemImageSrc, getProfileImageSrc } from "../../utils/image";
+import { fetchSellerReviews } from "../../api/review";
 
 const Container = styled.div`
   max-width: 800px;
@@ -15,6 +16,7 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   position: relative;
+  gap: 10px;
 `;
 
 const Image = styled.img`
@@ -92,6 +94,93 @@ const NoItemMessage = styled.p`
   font-size: 16px;
 `;
 
+const SellerContainer = styled.div`
+  display: flex;
+  object-fit: contain;
+  align-items: center;
+  margin-right: auto;
+  gap: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background: #ececec;
+  }
+`;
+
+const SellerProfile = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid ${(props) => props.theme.colors.darkGray};
+`;
+
+const SellerInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const SellerName = styled.span`
+  font-size: 16px;
+  font-weight: bold;
+`;
+
+const SellerRating = styled.span`
+  font-size: 14px;
+  color: ${(props) => props.theme.colors.gray};
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 500px;
+  max-height: 600px;
+  overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+`;
+
+const ReviewItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #f9f9f9;
+  }
+`;
+
+const ReviewText = styled.p`
+  font-size: 14px;
+  margin: 6px 0;
+`;
+
+const ReviewBidInfo = styled.span`
+  font-size: 12px;
+  color: ${(props) => props.theme.colors.gray};
+`;
+
+
 const AuctionItemDetail = () => {
   const navigate = useNavigate();
   const isLogin = isAuthenticated();
@@ -101,6 +190,8 @@ const AuctionItemDetail = () => {
   const [timeLeft, setTimeLeft] = useState("");
   const [isBiddingActive, setIsBiddingActive] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [sellerReviews, setSellerReviews] = useState([]);
 
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
@@ -143,6 +234,21 @@ const AuctionItemDetail = () => {
     const interval = setInterval(updateTimer, 1000);
     return () => clearInterval(interval);
   }, [item]);
+  
+  // 모달이 열릴 때 리뷰 데이터를 가져옴
+  useEffect(() => {
+    if (!isReviewModalOpen) return;
+
+    const loadSellerReviews = async () => {
+      const response = await fetchSellerReviews(item.seller.id);
+      if (response.success) {
+        setSellerReviews(response.data.reviews);
+      }
+    };
+    if (isReviewModalOpen) {
+      loadSellerReviews();
+    }
+  }, [isReviewModalOpen, item]);
 
   const formatTime = (ms) => {
     if (ms <= 0) return "00:00:00";
@@ -169,6 +275,13 @@ const AuctionItemDetail = () => {
     <>
       <BackButton />
       <Container>
+      <SellerContainer onClick={() => setIsReviewModalOpen(true)}>
+        <SellerProfile src={getProfileImageSrc(item.seller.imageUrl)} alt="판매자 프로필" />
+        <SellerInfo>
+          <SellerName>{item.seller.nickname}</SellerName>
+          <SellerRating>{item.seller.averageScore === 0 ? "" : `⭐ ${item.seller.averageScore}`} ({item.seller.totalReviewCount}개 리뷰)</SellerRating>
+        </SellerInfo>
+      </SellerContainer>
       {isLogin ? <LikeButton onClick={() => handleLike(isLiked)} isLiked={isLiked}>{isLiked ? "좋아요 취소" : "좋아요"}</LikeButton>: <></>}
       <Image src={getItemImageSrc(item.imageUrl)} alt={item.name} />
       <Info>
@@ -212,6 +325,26 @@ const AuctionItemDetail = () => {
         </>
       )}
   </Container>
+  {isReviewModalOpen && (
+    <ModalOverlay onClick={() => setIsReviewModalOpen(false)}>
+      <ModalContent onClick={(e) => e.stopPropagation()}>
+        <h3>{item.seller.nickname}님의 리뷰 ({sellerReviews.length}개) {item.seller.averageScore === 0 ? "" : `⭐ ${item.seller.averageScore}`}</h3>
+        {sellerReviews.length > 0 ? (
+          sellerReviews.map((review) => (
+            <ReviewItem key={review.reviewId} onClick={() => {
+                setIsReviewModalOpen(false);
+                navigate(`/auction/${review.bid.auctionItemId}`);
+              }}>
+              <ReviewText>{review.bid.bidderName}: "{review.content}"</ReviewText>
+              <ReviewBidInfo>⭐ {review.score} | {review.bid.auctionItemName} ({review.bid.biddingPrice}원)</ReviewBidInfo>
+            </ReviewItem>
+          ))
+        ) : (
+          <p>아직 리뷰가 없습니다.</p>
+        )}
+      </ModalContent>
+    </ModalOverlay>
+  )}
     </>
   );
 };

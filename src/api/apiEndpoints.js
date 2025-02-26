@@ -20,6 +20,7 @@ export const API_ENDPOINTS = {
     REGISTRATIONS: `/api/users/registrations`,
     BIDS: `/api/users/bids`,
     BID_DETAIL: (bidId) => `/api/users/bids/${bidId}`,
+    REVIEWS: (sellerId) => `/api/sellers/${sellerId}/reviews`
   },
   ADMIN: {
     ITEM_LIST: `/api/admin/auction-items`,
