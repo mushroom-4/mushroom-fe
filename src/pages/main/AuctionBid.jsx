@@ -82,7 +82,10 @@ const Bubble = styled.div`
   background: ${({ isMe }) => (isMe ? "#007bff" : "white")};
   color: ${({ isMe }) => (isMe ? "white" : "black")};
   box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-  ${({ isBid }) => isBid && `background: #f0f8ff; color: #007bff; font-weight: bold;`} /* 입찰 메시지 */
+  ${({ messageType }) => messageType !== "MESSAGE" &&
+  (messageType === "ERROR" 
+    ? `background: #ffabab; color: #940000; font-weight: bold;`
+    : `background: #f0f8ff; color: #007bff; font-weight: bold;`)};
   word-break: break-word;
 `;
 
@@ -358,9 +361,7 @@ const AuctionBid = () => {
         client.subscribe(`/ws/sub/chats/${auctionItemId}`, (message) => {
           const receivedMessage = JSON.parse(message.body);
           console.log(receivedMessage);
-          if (!Array.isArray(receivedMessage)) {
-            setChatMessages((prev) => [...prev, receivedMessage]);
-          }
+          setChatMessages((prev) => [...prev, receivedMessage]);
           if (receivedMessage.messageType !== "MESSAGE") {
             const bidAmountMatch = receivedMessage.message.match(/([\d,]+)(?=원에 입찰하였습니다\.)/);
             if (bidAmountMatch) {
@@ -426,7 +427,7 @@ const AuctionBid = () => {
       setMessage("");
     } catch (error) {
       console.error("🚨 메시지 전송 오류:", error);
-      alert("입찰 내역이 없어서 채팅을 할 수 없습니다.");
+      alert("메시지 전송 중 오류가 발생했습니다.");
     }    
   };
 
@@ -467,12 +468,11 @@ const AuctionBid = () => {
       <ChatSection ref={scrollRef}>
         {chatMessages.map((msg, index) => {
           const isMe = msg.nickname === context.user.nickname;
-          const isBid = msg.messageType !== "MESSAGE";
           return (
             <ChatMessage key={index} isMe={isMe}>
               <ChatMessageBottom isMe={isMe}>
                 <ProfileImage src={getProfileImageSrc(msg.imageUrl)} alt="profile" />
-                <Bubble isMe={isMe} isBid={isBid}>{msg.message}</Bubble>
+                <Bubble isMe={isMe} messageType={msg.messageType}>{msg.message}</Bubble>
               </ChatMessageBottom>
               <MessageInfo isMe={isMe}>
                 <span>{msg.nickname}</span>
