@@ -6,7 +6,7 @@ import { getItemImageSrc } from "../../utils/image";
 import PaymentModal from "../../components/PaymentModal";
 import BackButton from "../../components/common/BackButton";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-import { createSellerReview } from "../../api/review";
+import { createSellerReview, deleteSellerReview } from "../../api/review";
 
 const Container = styled.div`
   max-width: 650px;
@@ -103,7 +103,6 @@ const ReviewSection = styled.div`
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  text-align: center;
   
   & > div {
     display: flex;
@@ -150,6 +149,60 @@ const SubmitReviewButton = styled.button`
   }
 `;
 
+const MyReviewCard = styled.div`
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  & > div {
+    display: flex;
+    padding: 1rem 0;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    justify-content: space-between;
+  }
+`;
+
+const MyReviewScore = styled.p`
+  font-size: 18px;
+  font-weight: bold;
+  color: #ff9500;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+`;
+
+const MyReviewText = styled.p`
+  background-color: white;
+  border: 1px solid ${(props) => props.theme.colors.lightGray};
+  width: 100%;
+  font-size: 18px;
+  color: #333;
+  padding: 1rem 2rem;
+  position: relative;
+`;
+
+const DeleteReviewButton = styled.button`
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 6px;
+  border: none;
+  background-color: ${(props) => props.theme.colors.darkGray};
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+  position: absolute;
+  bottom: -3rem;
+  right: 0;
+
+  &:hover {
+    background-color: ${(props) => props.theme.colors.gray};
+  }
+`;
+
 const statusMessage = {
   "BIDDING": "경매 진행 중",
   "SUCCEED": "입찰 성공! 결제 가능",
@@ -173,6 +226,7 @@ const BidDetail = () => {
       setLoading(true);
       const response = await fetchBidDetail(bidId);
       setBid(response.data);
+      console.log(response.data);
       setLoading(false);
     };
 
@@ -210,6 +264,18 @@ const BidDetail = () => {
     setIsSubmitting(false);
   };
 
+  const handleDeleteReview = async (reviewId) => {
+    if (window.confirm("정말 리뷰를 삭제하시겠습니까?")) {
+      const response = await deleteSellerReview(reviewId);
+      if (response.success) {
+        alert("리뷰가 삭제되었습니다.");
+        window.location.reload();
+      } else {
+        alert(response.message);
+      }
+    }
+  };
+
   if (loading) return <LoadingSpinner />;
   if (!bid) return <p style={{ textAlign: "center", fontSize: "16px" }}>데이터를 불러올 수 없습니다.</p>;
 
@@ -221,37 +287,37 @@ const BidDetail = () => {
         
         <ItemInfoSection>
         <Image
-            src={getItemImageSrc(bid.searchAuctionItemRes.imageUrl)}
-            alt={bid.searchAuctionItemRes.name}
-            onClick={() => navigate(`/auction/${bid.searchAuctionItemRes.auctionItemId}`)}
+            src={getItemImageSrc(bid.auctionItem.imageUrl)}
+            alt={bid.auctionItem.name}
+            onClick={() => navigate(`/auction/${bid.auctionItem.id}`)}
           />
         <div>
           <DetailItem>
-            상품명: <HighlightText>{bid.searchAuctionItemRes.name}</HighlightText>
+            상품명: <HighlightText>{bid.auctionItem.name}</HighlightText>
           </DetailItem>
           <DetailItem>
-            브랜드: <HighlightText>{bid.searchAuctionItemRes.brand}</HighlightText>
+            브랜드: <HighlightText>{bid.auctionItem.brand}</HighlightText>
           </DetailItem>
           <DetailItem>
-            카테고리: <HighlightText>{bid.searchAuctionItemRes.category}</HighlightText>
+            카테고리: <HighlightText>{bid.auctionItem.category}</HighlightText>
           </DetailItem>
           <DetailItem>
-            사이즈: <HighlightText>{bid.searchAuctionItemRes.size}</HighlightText>
+            사이즈: <HighlightText>{bid.auctionItem.size}</HighlightText>
           </DetailItem>
         </div>
         </ItemInfoSection>
         <BidInfoSection>
           <DetailItem>
-            경매 시작가: <HighlightText>{bid.searchAuctionItemRes.startPrice.toLocaleString()}원</HighlightText>
+            경매 시작가: <HighlightText>{bid.auctionItem.startPrice.toLocaleString()}원</HighlightText>
           </DetailItem>
           <DetailItem>
             입찰한 가격: <HighlightText>{bid.biddingPrice.toLocaleString()}원</HighlightText>
           </DetailItem>
           <DetailItem>
-            경매 시작: <HighlightText>{new Date(bid.searchAuctionItemRes.startTime).toLocaleString("ko-KR")}</HighlightText>
+            경매 시작: <HighlightText>{new Date(bid.auctionItem.startTime).toLocaleString("ko-KR")}</HighlightText>
           </DetailItem>
           <DetailItem>
-            경매 종료: <HighlightText>{new Date(bid.searchAuctionItemRes.endTime).toLocaleString("ko-KR")}</HighlightText>
+            경매 종료: <HighlightText>{new Date(bid.auctionItem.endTime).toLocaleString("ko-KR")}</HighlightText>
           </DetailItem>
         </BidInfoSection>
 
@@ -274,28 +340,41 @@ const BidDetail = () => {
       </Container>
       {bid.biddingStatus === "PAYMENT_COMPLETED" && (
         <ReviewSection>
-          <div>
-            <h3>판매자 리뷰 작성</h3>
+          {bid.review ? (
+            <MyReviewCard>
+              <div>
+                <h3>내가 작성한 리뷰</h3>
+                <MyReviewScore>⭐ {bid.review.score}</MyReviewScore>
+              </div>
+              <MyReviewText>{bid.review.content}<DeleteReviewButton onClick={() => handleDeleteReview(bid.review.id)}>삭제</DeleteReviewButton></MyReviewText>
+              
+            </MyReviewCard>
+          ) : (
+          <>
             <div>
-              <label>점수: </label>
-              <ReviewScoreInput
-                type="number"
-                min="1"
-                max="10"
-                value={reviewScore}
-                onChange={(e) => setReviewScore(Number(e.target.value))}
-              />
+              <h3>판매자 리뷰 작성</h3>
+              <div>
+                <label>점수: </label>
+                <ReviewScoreInput
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={reviewScore}
+                  onChange={(e) => setReviewScore(Number(e.target.value))}
+                />
+              </div>
             </div>
-          </div>
-          <ReviewTextArea
-            placeholder="리뷰 내용을 입력하세요 (최대 100자)"
-            maxLength={100}
-            value={reviewContent}
-            onChange={(e) => setReviewContent(e.target.value)}
-          />
-          <SubmitReviewButton onClick={handleSubmitReview} disabled={isSubmitting}>
-            리뷰 제출
-          </SubmitReviewButton>
+            <ReviewTextArea
+              placeholder="리뷰 내용을 입력하세요 (최대 100자)"
+              maxLength={100}
+              value={reviewContent}
+              onChange={(e) => setReviewContent(e.target.value)}
+            />
+            <SubmitReviewButton onClick={handleSubmitReview} disabled={isSubmitting}>
+              리뷰 제출
+            </SubmitReviewButton>
+          </>
+          )}
         </ReviewSection>
       )}
     </>

@@ -8,3 +8,7 @@ export const fetchSellerReviews = (sellerId) => {
 export const createSellerReview = (bidId, review) => {
   return request(API_ENDPOINTS.USER.CREATE_REVIEW(bidId), "POST", review, true, false);
 }
+
+export const deleteSellerReview = (reviewId) => {
+  return request(API_ENDPOINTS.USER.DELETE_REVIEW(reviewId), "DELETE", null, true, false);
+}

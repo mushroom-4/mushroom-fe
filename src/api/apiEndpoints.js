@@ -22,6 +22,7 @@ export const API_ENDPOINTS = {
     BID_DETAIL: (bidId) => `/api/users/bids/${bidId}`,
     REVIEWS: (sellerId) => `/api/sellers/${sellerId}/reviews`,
     CREATE_REVIEW: (bidId) => `/api/bids/reviews?bidId=${bidId}`,
+    DELETE_REVIEW: (reviewId) => `/api/bids/reviews/${reviewId}`,
   },
   ADMIN: {
     ITEM_LIST: `/api/admin/auction-items`,

@@ -147,10 +147,10 @@ const BidHistory = () => {
         {bids.map((bid) => (
           <Card key={bid.bidId} onClick={() => navigate(`/bids/${bid.bidId}`)} status={bid.biddingStatus} >
             <ImageWrapper>
-              <Image src={getItemImageSrc(bid.searchAuctionItemRes.imageUrl)} alt={bid.searchAuctionItemRes.name} />
+              <Image src={getItemImageSrc(bid.auctionItem.imageUrl)} alt={bid.auctionItem.name} />
             </ImageWrapper>
             <Info>
-              <ItemName>{bid.searchAuctionItemRes.name}</ItemName>
+              <ItemName>{bid.auctionItem.name}</ItemName>
               <BidInfo>입찰가: {bid.biddingPrice.toLocaleString()}원</BidInfo>
               <BidInfo>상태: {bid.biddingStatus}</BidInfo>
             </Info>
