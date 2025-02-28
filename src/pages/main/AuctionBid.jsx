@@ -20,17 +20,16 @@ const Container = styled.div`
   gap: 20px;
   padding: 40px;
   margin: 40px auto;
-
-  @media (max-width: 800px) {
-    flex-direction: column;
-    align-items: center;
-  }
 `;
 
 const AuctionContainer = styled.div`
   display: flex;
   gap: 20px;
   width: 100%;
+  @media (max-width: 800px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 
@@ -51,8 +50,8 @@ const ChatSection = styled.div`
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 12px;
-  min-height: calc(80vh - 200px);
-  max-height: calc(80vh - 200px);
+  min-height: calc(85vh - 200px);
+  max-height: calc(85vh - 200px);
   overflow-y: auto;
   background: #f9f9f9;
   transition: overflow-y 0.3s ease-in-out;
@@ -273,6 +272,9 @@ const AuctionItemInfo = styled.div`
   padding: 16px;
   border-radius: 8px;
   gap: 2rem;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  overflow: hidden;
 `;
 
 const ItemImage = styled.img`

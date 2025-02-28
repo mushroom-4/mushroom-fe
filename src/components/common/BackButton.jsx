@@ -14,6 +14,7 @@ const Button = styled.div`
   outline: none;
   rotate: -45deg;
   background: none;
+  z-index: 5;
   
   border-top: 5px solid ${(props) => props.theme.colors.gray};
   border-left: 5px solid ${(props) => props.theme.colors.gray};
