@@ -19,14 +19,6 @@ const Container = styled.div`
   gap: 10px;
 `;
 
-const Image = styled.img`
-  width: 100%;
-  max-height: 400px;
-  object-fit: cover;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-`;
-
 const Info = styled.div`
   width: 100%;
   margin-top: 20px;
@@ -195,6 +187,51 @@ const ReviewBidInfo = styled.span`
   color: ${(props) => props.theme.colors.gray};
 `;
 
+const Image = styled.img`
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+`;
+
+const FullScreenOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+`;
+
+const FullScreenImage = styled.img`
+  width: 80%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 8px;
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+  z-index: 2100;
+  &:hover {
+    opacity: 0.7;
+  }
+`;
+
+
 const formatScore = (score) => {
   if (Number.isInteger(score * 10)) return score.toString();
   return score.toFixed(2);
@@ -211,6 +248,7 @@ const AuctionItemDetail = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [sellerReviews, setSellerReviews] = useState([]);
+  const [isImageOpen, setIsImageOpen] = useState(false);
 
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
@@ -302,7 +340,14 @@ const AuctionItemDetail = () => {
         </SellerInfo>
       </SellerContainer>
       {isLogin ? <LikeButton onClick={() => handleLike(isLiked)} isLiked={isLiked}>{isLiked ? "좋아요 취소" : "좋아요"}</LikeButton>: <></>}
-      <Image src={getItemImageSrc(item.imageUrl)} alt={item.name} />
+      
+      <Image src={getItemImageSrc(item.imageUrl)} alt={item.name} onClick={() => setIsImageOpen(true)}/>
+      {isImageOpen && (
+        <FullScreenOverlay onClick={() => setIsImageOpen(false)}>
+          <CloseButton onClick={() => setIsImageOpen(false)}>✕</CloseButton>
+          <FullScreenImage src={getItemImageSrc(item.imageUrl)} alt={item.name} />
+        </FullScreenOverlay>
+      )}
       <Info>
         <Title>{item.brand} - {item.name}</Title>
         <Description>{item.description}</Description>
