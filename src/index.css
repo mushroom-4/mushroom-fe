@@ -107,6 +107,10 @@ img {
   -webkit-user-drag: none;
 }
 
+a {
+  -webkit-user-drag: none;  
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

@@ -233,7 +233,7 @@ const HighestBidderContainer = styled.div`
   background: ${(props) => (props.isMe ? "#f1ffed" : "white")};
   padding: 30px 20px;
   border-radius: 10px;
-  margin-top: 10px;
+  margin: 10px 0;
   
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   & > div {
