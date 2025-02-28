@@ -13,8 +13,10 @@ import LoadingSpinner from "../../components/common/LoadingSpinner";
 import { formatDate } from "../../utils/date";
 
 /** ✅ 전체 컨테이너 */
+
 const Container = styled.div`
   display: flex;
+  flex-direction: column;
   gap: 20px;
   padding: 40px;
   margin: 40px auto;
@@ -23,6 +25,12 @@ const Container = styled.div`
     flex-direction: column;
     align-items: center;
   }
+`;
+
+const AuctionContainer = styled.div`
+  display: flex;
+  gap: 20px;
+  width: 100%;
 `;
 
 
@@ -103,10 +111,8 @@ const ChatInputContainer = styled.div`
   display: flex;
   align-items: center;
   padding: 10px;
-  border-top: 1px solid #ddd;
   position: sticky;
   bottom: 0;
-  background: white;
   gap: 10px;
 `;
 
@@ -127,13 +133,15 @@ const SendButton = styled.button`
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  background-color: ${(props) => props.theme.colors.darkGray};
+  background-color: ${(props) => (props.disabled ? props.theme.colors.lightGray : props.theme.colors.darkGray)};
   color: white;
   font-size: 14px;
   transition: 0.2s ease-in-out;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  
 
   &:hover {
-    background-color: ${(props) => props.theme.colors.gray};
+    background-color: ${(props) => (props.disabled ? props.theme.colors.lightGray : props.theme.colors.gray)};
   }
 `;
 
@@ -223,7 +231,7 @@ const HighestBidderContainer = styled.div`
   gap: 10px;
   align-items: center;
   
-  background: white;
+  background: ${(props) => (props.isMe ? "#f1ffed" : "white")};
   padding: 30px 20px;
   border-radius: 10px;
   margin-top: 10px;
@@ -253,6 +261,42 @@ const TimerText = styled.p`
     return "#444444";
   }};
   transition: color 0.5s ease-in-out;
+`;
+
+const AuctionItemInfo = styled.div`
+  position: absolute;
+  top: -3.5rem;
+  left: 50%;
+  transform: translate(-50%, 0);
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-radius: 8px;
+  gap: 2rem;
+`;
+
+const ItemImage = styled.img`
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+`;
+
+const ItemDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+`;
+
+const ItemName = styled.h2`
+  font-size: 18px;
+  font-weight: bold;
+`;
+
+const ItemMeta = styled.p`
+  font-size: 14px;
+  color: #666;
 `;
 
 const getBidIncrements = (price) => {
@@ -319,18 +363,19 @@ const AuctionBid = () => {
   useEffect(() => {
     const loadAuctionItemDetail = async () => {
       setLoading(true);
-      const response1 = await fetchAuctionItemDetail(auctionItemId);
-      if (response1.success) {
-        setItem(response1.data);
-        setHighestBid(response1.data.bid ? response1.data.bid.maxPrice : response1.data.startPrice);
-        response1.data.bid && setHighestBidder({
-          nickname: response1.data.bid.bidderNickname,
-          imageUrl: response1.data.bid.imageUrl,
+      const itemResponse = await fetchAuctionItemDetail(auctionItemId);
+      console.log(itemResponse);
+      if (itemResponse.success) {
+        setItem(itemResponse.data);
+        setHighestBid(itemResponse.data.bid ? itemResponse.data.bid.maxPrice : itemResponse.data.startPrice);
+        itemResponse.data.bid && setHighestBidder({
+          nickname: itemResponse.data.bid.bidderNickname,
+          imageUrl: itemResponse.data.bid.imageUrl,
         });
       }
-      const response2 = await auctionItemChat(auctionItemId);
-      if (response2.success) {
-        const receivedMessage = response2.data;
+      const chatResponse = await auctionItemChat(auctionItemId);
+      if (chatResponse.success) {
+        const receivedMessage = chatResponse.data;
         setChatMessages(receivedMessage);
       }
       setLoading(false);
@@ -462,14 +507,28 @@ const AuctionBid = () => {
   return (
     <>
     <BackButton/>
+    {item && (
+          <AuctionItemInfo>
+            <ItemImage src={getProfileImageSrc(item.imageUrl)} alt={item.name} />
+            <ItemDetails>
+              <ItemName>{item.name}</ItemName>
+              <ItemMeta>시작 금액: {item.startPrice.toLocaleString()}원</ItemMeta>
+            </ItemDetails>
+            <ItemDetails>
+              <ItemMeta>경매시작: {formatDate(new Date(item.startTime))}</ItemMeta>
+              <ItemMeta>경매종료: {formatDate(new Date(item.endTime))}</ItemMeta>
+            </ItemDetails>
+          </AuctionItemInfo>
+        )}
     <Container>
+    <AuctionContainer>
       <ChatContainer>
       {/* 채팅 영역 */}
       <ChatSection ref={scrollRef}>
         {chatMessages.map((msg, index) => {
           const isMe = msg.nickname === context.user.nickname;
           return (
-            <ChatMessage key={index} isMe={isMe}>
+            (isMe || msg.messageType !== "ERROR") && <ChatMessage key={index} isMe={isMe}>
               <ChatMessageBottom isMe={isMe}>
                 <ProfileImage src={getProfileImageSrc(msg.imageUrl)} alt="profile" />
                 <Bubble isMe={isMe} messageType={msg.messageType}>{msg.message}</Bubble>
@@ -488,18 +547,19 @@ const AuctionBid = () => {
         <ChatInputContainer>
           <ChatInput
             type="text"
-            placeholder="메시지를 입력하세요"
+            placeholder={context.user.nickname === item.seller.nickname ? "판매자는 채팅을 입력할 수 없습니다." : "메시지를 입력하세요"}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyUp={(e) => e.key === "Enter" && sendMessage()}
+            readOnly={context.user.nickname === item.seller.nickname}
           />
-          <SendButton onClick={sendMessage}>전송</SendButton>
+          <SendButton onClick={sendMessage} disabled={context.user.nickname === item.seller.nickname}>전송</SendButton>
         </ChatInputContainer>
       </ChatContainer>
 
       <BiddingSection>
       <TimerText timeLeft={parseInt(timeLeft.split(":")[2]) + parseInt(timeLeft.split(":")[1]) * 60 + parseInt(timeLeft.split(":")[0]) * 60 * 60}>{timeLeft}</TimerText>
-        {highestBidder && <HighestBidderContainer>
+        {highestBidder && <HighestBidderContainer isMe={highestBidder.nickname === context.user.nickname}>
           <span>현재 최고 입찰자: </span>
           <div>
             <ProfileImage src={getProfileImageSrc(highestBidder.imageUrl)} alt="최고 입찰자 프로필" />
@@ -507,13 +567,13 @@ const AuctionBid = () => {
           </div>
           <PriceText>{highestBid.toLocaleString()}원</PriceText>
         </HighestBidderContainer>}
-        <br/>
         {bidIncrements.map((increment, i) => (
           <BidButton key={increment} onClick={() => handleBidClick(increment)} disabled={!isLogin} tier={i + 1}>
             +{increment.toLocaleString()}
           </BidButton>
         ))}
       </BiddingSection>
+    </AuctionContainer>
     </Container>
     {/* 입찰 모달 */}
     {isModalOpen && (
