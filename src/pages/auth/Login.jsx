@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -21,13 +21,29 @@ const Form = styled.form`
   gap: 20px;
 `;
 
+const InputContainer = styled.div`
+  position: relative;
+  width: 300px;
+`;
+
 const Input = styled.input`
   display: block;
-  width: 300px;
+  width: 100%;
   padding: 8px;
   border-radius: 10px;
   outline: none;
   border: 1px solid ${(props) => props.theme.colors.gray};
+`;
+
+const ToggleButton = styled.button`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
 `;
 
 const Button = styled.button`
@@ -42,6 +58,15 @@ const Login = () => {
   const navigate = useNavigate();
   const context = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    // localStorage에서 회원가입한 정보 가져오기
+    const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+    if (storedUser) {
+      setForm({ email: storedUser.email, password: storedUser.password });
+    }
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -63,8 +88,13 @@ const Login = () => {
   return (
       <Wrapper>
         <Form onSubmit={handleSubmit}>
-          <Input type="email" name="email" placeholder="이메일" onChange={handleChange} required />
-          <Input type="password" name="password" placeholder="비밀번호" onChange={handleChange} required />
+          <Input type="email" name="email" value={form.email} placeholder="이메일" onChange={handleChange} required />
+          <InputContainer>
+            <Input type={showPassword ? "text" : "password"} placeholder="비밀번호" name="password" value={form.password} onChange={handleChange} required />
+            <ToggleButton type="button" onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? "👁️" : "🙈"}
+            </ToggleButton>
+          </InputContainer>
           <Button type="submit">로그인</Button>
         </Form>
       </Wrapper>
