@@ -227,11 +227,13 @@ const Layout = () => {
   const handleSearch = useCallback(
     (query) => {
       if (query.trim()) {
-        navigate(`/?keyword=${encodeURIComponent(query)}`);
+        const searchParams = new URLSearchParams(location.search);
+        searchParams.set("keyword", query);
+        navigate(`/?${searchParams.toString()}`);
         setSearchOpen(false);
       }
     },
-    [navigate]
+    [navigate, location.search]
   );
 
   /** ✅ 검색어 변경 핸들러 */
@@ -294,7 +296,7 @@ const Layout = () => {
       {/* ✅ 헤더 */}
       <HeaderContainer>
         <Header>
-          <HomeLogoLink to="/">
+          <HomeLogoLink to="/?page=1&status=PROGRESSING">
             <LogoImage src={mainLogo} alt="멋이룸" />
           </HomeLogoLink>
           <Nav>

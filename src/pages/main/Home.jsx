@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { fetchAuctionItems } from "../../api/auctionItem";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -13,6 +13,29 @@ const Container = styled.div`
   gap: 10px;
   padding: 10px;
   justify-content: center;
+`;
+
+const Tabs = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+`;
+
+const Tab = styled.button`
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  cursor: ${({ disabled }) => (disabled ? "default" : "pointer")};
+  background: ${({ active, theme }) => (active ? theme.colors.darkGray : theme.colors.lightGray)};
+  color: ${({ active, theme }) => (active ? "white" : theme.colors.gray)};
+  border-radius: 8px;
+  margin: 0 5px;
+  transition: 0.3s;
+
+  &:hover {
+    background: ${({ disabled, theme }) => (disabled ? theme.colors.darkGray : theme.colors.gray)};
+    color: white;
+  }
 `;
 
 const FilterToggleButton = styled.button`
@@ -185,6 +208,10 @@ const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [auctionItems, setAuctionItems] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("PROGRESSING");
+  const isFirstRender = useRef(true);
   const [filters, setFilters] = useState({
     brand: searchParams.get("brand") || "",
     category: searchParams.get("category") || "",
@@ -194,24 +221,36 @@ const Home = () => {
     startDate: searchParams.get("startDate") || "",
     endDate: searchParams.get("endDate") || "",
     page: searchParams.get("page") || "1",
+    status: searchParams.get("status") || "PROGRESSING"
   });
-  const [isFilterVisible, setIsFilterVisible] = useState(false);
-  const [loading, setLoading] = useState(true);
-
 
   const toggleFilter = () => setIsFilterVisible((prev) => !prev);
 
   useEffect(() => {
-    if (!searchParams.has("page")) {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      
       const newParams = new URLSearchParams(searchParams);
-      newParams.set("page", "1");
-  
-      setFilters((prev) => ({ ...prev, page: "1" }));
-      setSearchParams(newParams, { replace: true });
+
+      let updated = false;
+      if (!searchParams.has("page")) {
+        newParams.set("page", "1");
+        updated = true;
+      }
+      if (!searchParams.has("status")) {
+        newParams.set("status", "PROGRESSING");
+        updated = true;
+      }
+
+      if (updated) {
+        setSearchParams(newParams, { replace: true });
+      }
     }
   }, [searchParams, setSearchParams]);
 
   useEffect(() => {
+    if (isFirstRender.current) return;
+
     const fetchItems = async () => {
       setLoading(true);
       const params = Object.fromEntries(searchParams);
@@ -225,21 +264,27 @@ const Home = () => {
       }
       setLoading(false);
     };
-    fetchItems();
+
+    if (searchParams.toString()) {
+      fetchItems();
+    }
   }, [searchParams]);
 
+  const handleTabChange = (status) => {
+    if (activeTab === status) return;
+    setActiveTab(status);
+    setFilters((prev) => ({ ...prev, status, page: "1" }));
+    
+    const newParams = new URLSearchParams({ ...filters, status, page: "1" });
+    setSearchParams(newParams, { replace: true });
+  };
+
   const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handlePageChange = (newPage) => {
-    setFilters((prev) => ({
-      ...prev,
-      page: newPage.toString(),
-    }));
+    setFilters((prev) => ({ ...prev, page: newPage.toString() }));
     const newParams = new URLSearchParams({ ...filters, page: newPage.toString() });
     setSearchParams(newParams);
   };
@@ -250,23 +295,9 @@ const Home = () => {
     if (filters.keyword) {
       newParams.set("keyword", encodeURIComponent(filters.keyword));
     }
-    setSearchParams(newParams);
+    setSearchParams(newParams, { replace: true });
   };
 
-  // const resetFilters = () => {
-  //   setFilters({
-  //     brand: "",
-  //     category: "",
-  //     size: "",
-  //     minPrice: "",
-  //     maxPrice: "",
-  //     startDate: "",
-  //     endDate: "",
-  //     page: "1",
-  //   });
-  //   setSearchParams(new URLSearchParams());
-  // };
-  
   if (loading) return <LoadingSpinner />;
   
   return (
@@ -354,6 +385,14 @@ const Home = () => {
           <FilterButton onClick={handleSearch} dark>필터링</FilterButton>
         </ButtonGroup>
       </FilterContainer>
+      <Tabs>
+        <Tab active={activeTab === "PROGRESSING"} disabled={activeTab === "PROGRESSING"} onClick={() => handleTabChange("PROGRESSING")}>
+          경매 중
+        </Tab>
+        <Tab active={activeTab === "WAITING"} disabled={activeTab === "WAITING"} onClick={() => handleTabChange("WAITING")}>
+          경매 전
+        </Tab>
+      </Tabs>
       {/* 경매 아이템 리스트 */}
       <Container>
         {auctionItems.map((item) => (
