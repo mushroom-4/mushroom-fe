@@ -202,6 +202,48 @@ const LogoutButton = styled(DropdownItem)`
   color: ${(props) => props.theme.colors.gray};
 `;
 
+const Footer = styled.footer`
+  background-color: ${(props) => props.theme.colors.lightGray};
+  color: ${(props) => props.theme.colors.darkGray};
+  padding: 20px 0;
+  text-align: center;
+  margin-top: 50px;
+  font-size: 14px;
+  border-top: 1px solid ${(props) => props.theme.colors.gray};
+`;
+
+const FooterContent = styled.div`
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+`;
+
+const FooterLinks = styled.div`
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
+
+const FooterLink = styled.a`
+  text-decoration: none;
+  color: ${(props) => props.theme.colors.darkGray};
+  font-size: 14px;
+
+  &:hover {
+    color: ${(props) => props.theme.colors.gray};
+  }
+`;
+
+const FooterText = styled.p`
+  font-size: 12px;
+  color: ${(props) => props.theme.colors.gray};
+`;
+
+
 const Layout = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -292,6 +334,7 @@ const Layout = () => {
   }, [searchOpen]);
 
   return (
+    <>
     <Container>
       {/* ✅ 헤더 */}
       <HeaderContainer>
@@ -363,7 +406,28 @@ const Layout = () => {
       <Section>
         <Outlet />
       </Section>
+      
     </Container>
+    <Footer>
+    <FooterContent>
+      <FooterLinks>
+        <FooterLink href="https://yeim.notion.site/MUTT-IROOM-19616458a6bf8099b44ec1c8827c7995" target="_blank" rel="noopener noreferrer">
+          서비스 소개
+        </FooterLink>
+        <FooterLink href="https://yeim.notion.site/Mushroom-19316458a6bf80919226c740f9948ea1" target="_blank" rel="noopener noreferrer">
+          개발자 소개
+        </FooterLink>
+        <FooterLink href="https://yeim.notion.site/MUTT-IROOM-1a416458a6bf808288d3e40fc51858f5" target="_blank" rel="noopener noreferrer">
+          이용약관
+        </FooterLink>
+        <FooterLink href="https://yeim.notion.site/1af16458a6bf8084813fd568095d6570?v=1af16458a6bf80ecb287000caa161768" target="_blank" rel="noopener noreferrer">
+          머쉬룸 갤러리
+        </FooterLink>
+      </FooterLinks>
+      <FooterText>© 2025 Mushroom. All Rights Reserved.</FooterText>
+    </FooterContent>
+  </Footer>
+    </>
   );
 };
 

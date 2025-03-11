@@ -10,8 +10,9 @@ export const fetchAuctionItems = (params = {}) => {
   if (params.endDate && dateRegex.test(params.endDate)) {
     params.endDate = `${params.endDate}T23:59:59`;
   }
+  const sort = params.status === "WAITING" ? "startTime" : "endTime";
   const queryString = new URLSearchParams(params).toString();
-  return request(`${API_ENDPOINTS.AUCTION.SEARCH}?${queryString}`, "GET", null, false, false);
+  return request(`${API_ENDPOINTS.AUCTION.SEARCH}?${queryString}&sort=${sort}&sortOrder=ASC`, "GET", null, false, false);
 };
 
 /** ✅ 경매 물품 상세 조회 */

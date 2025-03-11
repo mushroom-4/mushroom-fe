@@ -36,6 +36,7 @@ const AuctionContainer = styled.div`
 const ChatContainer = styled.div`
   display: flex;
   flex-direction: column;
+  gap: 10px;
   width: 50%;
   @media (max-width: 800px) {
     width: 100%;
@@ -50,8 +51,8 @@ const ChatSection = styled.div`
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 12px;
-  min-height: calc(85vh - 200px);
-  max-height: calc(85vh - 200px);
+  min-height: calc(85vh - 250px);
+  max-height: calc(85vh - 250px);
   overflow-y: auto;
   background: #f9f9f9;
   transition: overflow-y 0.3s ease-in-out;
@@ -301,6 +302,50 @@ const ItemMeta = styled.p`
   color: #666;
 `;
 
+const UserListContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f9f9f9;
+`;
+
+const UserListTitle = styled.h3`
+  font-size: 14px;
+  font-weight: bold;
+`;
+
+const UserListItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  & > span {
+    white-space: nowrap;
+  }
+`;
+
+const UserListRow = styled.div`
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+`;
+
+const UserList = ({ users }) => (
+  <UserListContainer>
+    <UserListTitle>접속자 목록 ({users.length}명)</UserListTitle>
+    <UserListRow>
+    {users.map((user) => (
+      <UserListItem key={user.userId}>
+        <ProfileImage src={getProfileImageSrc(user.imageUrl)} alt={user.nickname} />
+        <span>{user.nickname}</span>
+      </UserListItem>
+    ))}
+    </UserListRow>
+  </UserListContainer>
+);
+
 const getBidIncrements = (price) => {
   
   if (price < 100000) return [100, 500, 1000, 5000];
@@ -327,6 +372,8 @@ const AuctionBid = () => {
   const context = useAuth();
   const bidIncrements = getBidIncrements(highestBid);
   const [timeLeft, setTimeLeft] = useState("");
+  const [userList, setUserList] = useState([]);
+
   
   useEffect(() => {
     if (!item) {
@@ -404,10 +451,12 @@ const AuctionBid = () => {
       debug: (str) => console.log("📌 [STOMP Debug]:", str),
       onConnect: (frame) => {
         console.log("✅ WebSocket Connected:", frame);
-
+        client.subscribe(`/ws/sub/chatrooms/${auctionItemId}/users`, (message) => {
+          const receivedData = JSON.parse(message.body);
+          setUserList(receivedData.userInfoRes);
+        });
         client.subscribe(`/ws/sub/chats/${auctionItemId}`, (message) => {
           const receivedMessage = JSON.parse(message.body);
-          console.log(receivedMessage);
           setChatMessages((prev) => [...prev, receivedMessage]);
           if (receivedMessage.messageType !== "MESSAGE") {
             const bidAmountMatch = receivedMessage.message.match(/([\d,]+)(?=원에 입찰하였습니다\.)/);
@@ -504,6 +553,9 @@ const AuctionBid = () => {
     }
   };
 
+  
+  
+
   if (loading) return <LoadingSpinner />;
 
   return (
@@ -525,6 +577,7 @@ const AuctionBid = () => {
     <Container>
     <AuctionContainer>
       <ChatContainer>
+      <UserList users={userList} />
       {/* 채팅 영역 */}
       <ChatSection ref={scrollRef}>
         {chatMessages.map((msg, index) => {
@@ -582,7 +635,7 @@ const AuctionBid = () => {
         <ModalOverlay>
           <ModalContent>
             <h3>입찰 금액을 확인해 주세요</h3>
-            <p>낙찰 이후에 취소하면 불이익이 있을 수 있습니다.</p>
+            <p>낙찰 이후에 미결제시 불이익이 있을 수 있습니다.</p>
             <PriceText>{selectedBid.toLocaleString()}원</PriceText>
             <ButtonGroup>
               <button onClick={() => setIsModalOpen(false)}>취소</button>

@@ -77,6 +77,7 @@ const Login = () => {
     const data = await login(form.email, form.password);
     if (data.success) {
       context.login(data.data.bearerToken);
+      localStorage.setItem("userInfo", JSON.stringify(form));
       alert("로그인 성공");
       navigate("/");
     } else {
