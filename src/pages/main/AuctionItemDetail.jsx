@@ -382,9 +382,9 @@ const AuctionItemDetail = () => {
         </>
       ) : (
         <>
-        <TimerText>입찰은 로그인 후 이용할 수 있어요!</TimerText>
-        <BidButton onClick={() => navigate("/login")}>
-          로그인하러 가기
+        <TimerText>입찰은 회원만 이용할 수 있어요!</TimerText>
+        <BidButton onClick={() => navigate("/register")}>
+          1초 회원가입 하러 가기
         </BidButton>
         </>
       )}

@@ -97,8 +97,8 @@ const AuctionItemEdit = () => {
           auctionItemCategory: response.data.category,
           brand: response.data.brand,
           startPrice: response.data.startPrice,
-          startTime: new Date(response.data.startTime).toISOString().slice(0, 16),
-          endTime: new Date(response.data.endTime).toISOString().slice(0, 16),
+          startTime: new Date(response.data.startTime+"+00:00").toISOString().slice(0, 16),
+          endTime: new Date(response.data.endTime+"+00:00").toISOString().slice(0, 16),
         });
 
         if (response.data.imageUrl) {

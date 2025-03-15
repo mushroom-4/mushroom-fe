@@ -254,6 +254,7 @@ const Home = () => {
     const fetchItems = async () => {
       setLoading(true);
       const params = Object.fromEntries(searchParams);
+      setActiveTab(params.status);
       if (params.keyword) {
         params.keyword = decodeURIComponent(params.keyword);
       }
